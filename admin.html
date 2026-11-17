@@ -9,7 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('theme');
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
         document.documentElement.setAttribute('data-theme', 'light');
@@ -20,8 +21,8 @@
   </script>
   <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
   <style>
-    body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-sans); }
-    .theme-toggle { position: fixed; top: 15px; right: 20px; z-index: 1000; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-md); }
+    body { margin: 0; padding: 0; overflow: hidden; height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-sans); animation: none !important; transform: none !important; }
+    #theme-toggle.theme-toggle { position: fixed !important; top: 15px !important; right: 20px !important; bottom: auto !important; transform: none !important; z-index: 10001 !important; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-md); padding: 0; margin: 0; }
     .theme-icon-img { width: 24px; height: 24px; object-fit: contain; }
 
     #admin-app { display: none; height: 100vh; width: 100vw; }
@@ -41,7 +42,7 @@
     .main-editor { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
     .editor-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding-right: 80px; }
     .editor-header h1 { font-size: 18px; margin: 0; }
-    .header-actions { display: flex; gap: 8px; }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
     .editor-body { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; }
     .form-scroll { padding: 25px; overflow-y: auto; border-right: 1px solid var(--border); }
@@ -83,11 +84,12 @@
     .project-title { font-size: 18px; margin: 0 0 10px 0; color: var(--text); }
     .project-desc { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
-    .overlay-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-    .box { background: var(--surface); padding: 30px; border-radius: var(--r-lg); border: 1px solid var(--border); max-width: 400px; width: 100%; text-align: center; box-shadow: var(--shadow-md); }
+    .overlay-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
+    .box { background: var(--surface); padding: 30px; border-radius: var(--r-lg); border: 1px solid var(--border); max-width: 400px; width: 100%; text-align: center; box-shadow: var(--shadow-md); box-sizing: border-box; }
     .box h2 { color: var(--accent); margin-top: 0; }
     .box p { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
-    .pin-input { width: 100%; padding: 15px; font-size: 24px; text-align: center; letter-spacing: 5px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: var(--r-md); outline: none; margin-bottom: 15px; font-family: var(--font-mono); box-sizing: border-box; }
+    .pin-input { width: 100%; padding: 15px; font-size: 24px; text-align: center; letter-spacing: 5px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: var(--r-md); outline: none; margin-bottom: 15px; font-family: var(--font-mono); box-sizing: border-box; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+    .pin-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 77, 94, 0.12); }
     .status-msg { font-size: 12px; font-family: var(--font-mono); color: var(--accent); margin-top: 10px; }
 
     ::-webkit-scrollbar { width: 8px; }
@@ -112,9 +114,11 @@
     <div class="box">
       <h2>[ SISTEMA BLOQUEADO ]</h2>
       <p>Introduce el PIN de administrador.</p>
-      <input type="password" id="admin-pin" class="pin-input" maxlength="20" placeholder="••••" autocomplete="off">
-      <button class="btn btn-primary" style="width: 100%;" onclick="checkPin()">Desbloquear</button>
-      <p id="pin-error" style="display: none; color: var(--accent); margin-top: 12px;">PIN incorrecto.</p>
+      <form id="pin-form" onsubmit="event.preventDefault(); checkPin();" novalidate>
+        <input type="password" id="admin-pin" class="pin-input" maxlength="20" placeholder="••••" autocomplete="current-password" autofocus>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Desbloquear</button>
+      </form>
+      <p id="pin-error" style="display: none; color: var(--accent); margin-top: 12px; margin-bottom: 0;">PIN incorrecto.</p>
     </div>
   </div>
 
@@ -122,20 +126,22 @@
     <div class="box">
       <h2>🔧 Configuración Inicial</h2>
       <p>Conecta tu panel con GitHub para cargar los proyectos.</p>
-      <div class="form-field" style="text-align: left;">
-        <label>Usuario</label>
-        <input type="text" id="gh-user" placeholder="Ej: NizaTF">
-      </div>
-      <div class="form-field" style="text-align: left;">
-        <label>Repositorio</label>
-        <input type="text" id="gh-repo" placeholder="Ej: nizatf.github.io">
-      </div>
-      <div class="form-field" style="text-align: left;">
-        <label>Token (Fine-grained)</label>
-        <input type="password" id="gh-token" placeholder="github_pat_...">
-      </div>
-      <p id="config-error" style="display: none; color: var(--accent); margin-bottom: 10px;"></p>
-      <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="saveConfig()">Conectar y Entrar</button>
+      <form id="config-form" onsubmit="event.preventDefault(); saveConfig();" novalidate>
+        <div class="form-field" style="text-align: left;">
+          <label>Usuario</label>
+          <input type="text" id="gh-user" placeholder="Ej: NizaTF">
+        </div>
+        <div class="form-field" style="text-align: left;">
+          <label>Repositorio</label>
+          <input type="text" id="gh-repo" placeholder="Ej: nizatf.github.io">
+        </div>
+        <div class="form-field" style="text-align: left;">
+          <label>Token (Fine-grained)</label>
+          <input type="password" id="gh-token" placeholder="github_pat_...">
+        </div>
+        <p id="config-error" style="display: none; color: var(--accent); margin-bottom: 10px;"></p>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Conectar y Entrar</button>
+      </form>
     </div>
   </div>
 
@@ -158,7 +164,9 @@
             <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importJSON(event)">
             <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="exportJSON()">📥 Backup</button>
             <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="document.getElementById('import-file').click()">📤 Importar</button>
-            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px; border-color: var(--accent); color: var(--accent);" onclick="logout()">🚪 Salir</button>
+            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="openConfig()">⚙️ Config</button>
+            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="logout()" title="Bloquear pantalla sin borrar la clave guardada">🔒 Bloquear</button>
+            <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px; border-color: var(--accent); color: var(--accent);" onclick="fullLogout()" title="Cerrar sesión y borrar la clave de GitHub de la memoria local">🚪 Cerrar sesión</button>
             <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="saveProject()" id="save-btn">💾 Guardar</button>
           </div>
         </header>
@@ -261,6 +269,44 @@
     let currentImages = [];
     let previewIndex = 0;
 
+    const memorySession = {};
+    const memoryLocal = {};
+
+    function safeGetSession(key) {
+      try { return sessionStorage.getItem(key); } catch { return memorySession[key] ?? null; }
+    }
+    function safeSetSession(key, val) {
+      memorySession[key] = val;
+      try { sessionStorage.setItem(key, val); } catch {}
+    }
+    function safeRemoveSession(key) {
+      delete memorySession[key];
+      try { sessionStorage.removeItem(key); } catch {}
+    }
+    function safeGetLocal(key) {
+      try { return localStorage.getItem(key); } catch { return memoryLocal[key] ?? null; }
+    }
+    function safeSetLocal(key, val) {
+      memoryLocal[key] = val;
+      try { localStorage.setItem(key, val); } catch {}
+    }
+    function safeRemoveLocal(key) {
+      delete memoryLocal[key];
+      try { localStorage.removeItem(key); } catch {}
+    }
+
+    function hasGithubConfig() {
+      return Boolean(safeGetLocal('gh_token') && safeGetLocal('gh_user') && safeGetLocal('gh_repo'));
+    }
+
+    function openConfig() {
+      document.getElementById('gh-user').value = safeGetLocal('gh_user') || '';
+      document.getElementById('gh-repo').value = safeGetLocal('gh_repo') || '';
+      document.getElementById('gh-token').value = safeGetLocal('gh_token') || '';
+      document.getElementById('config-error').style.display = 'none';
+      document.getElementById('config-screen').style.display = 'flex';
+    }
+
     // Tema aislado para admin (sin sumar visitas ni mostrar widget flotante)
     (function initAdminTheme() {
       const html = document.documentElement;
@@ -269,12 +315,12 @@
 
       function applyTheme(theme) {
         html.setAttribute('data-theme', theme);
-        const iconSrc = theme === 'dark' ? '/assets/img/boton_oscuro.png' : '/assets/img/boton_claro.png';
+        const iconSrc = theme === 'dark' ? 'assets/img/boton_oscuro.png' : 'assets/img/boton_claro.png';
         if (toggle) {
           toggle.innerHTML = `<img src="${iconSrc}" alt="Cambiar tema" class="theme-icon-img">`;
         }
         if (favicon) {
-          favicon.href = theme === 'dark' ? '/assets/img/favicon_oscuro.png' : '/assets/img/favicon_claro.png';
+          favicon.href = theme === 'dark' ? 'assets/img/favicon_oscuro.png' : 'assets/img/favicon_claro.png';
         }
       }
 
@@ -284,35 +330,52 @@
       if (toggle) {
         toggle.addEventListener('click', () => {
           const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-          localStorage.setItem('theme', next);
+          safeSetLocal('theme', next);
           applyTheme(next);
         });
       }
     })();
 
     function logout() {
-      sessionStorage.removeItem('admin_logged');
+      safeRemoveSession('admin_logged');
+      window.location.reload();
+    }
+
+    function fullLogout() {
+      safeRemoveLocal('gh_token');
+      safeRemoveSession('admin_logged');
       window.location.reload();
     }
 
     function checkPin() {
-      const input = document.getElementById('admin-pin').value;
+      const pinEl = document.getElementById('admin-pin');
+      const errEl = document.getElementById('pin-error');
+      const input = pinEl.value.trim();
       if (input === ADMIN_PIN) {
-        sessionStorage.setItem('admin_logged', 'true');
+        errEl.style.display = 'none';
+        safeSetSession('admin_logged', 'true');
         document.getElementById('pin-screen').style.display = 'none';
-        if (!localStorage.getItem('gh_token')) {
-          document.getElementById('config-screen').style.display = 'flex';
+        if (!hasGithubConfig()) {
+          openConfig();
         } else {
           startApp();
         }
       } else {
-        document.getElementById('pin-error').style.display = 'block';
-        document.getElementById('admin-pin').value = '';
+        errEl.style.display = 'block';
+        pinEl.value = '';
+        pinEl.focus();
       }
     }
 
-    document.getElementById('admin-pin').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') checkPin();
+    const pinInputEl = document.getElementById('admin-pin');
+    pinInputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        checkPin();
+      }
+    });
+    pinInputEl.addEventListener('input', () => {
+      document.getElementById('pin-error').style.display = 'none';
     });
 
     function saveConfig() {
@@ -326,9 +389,9 @@
         return;
       }
       errEl.style.display = 'none';
-      localStorage.setItem('gh_user', user);
-      localStorage.setItem('gh_repo', repo);
-      localStorage.setItem('gh_token', token);
+      safeSetLocal('gh_user', user);
+      safeSetLocal('gh_repo', repo);
+      safeSetLocal('gh_token', token);
       document.getElementById('config-screen').style.display = 'none';
       startApp();
     }
@@ -339,20 +402,20 @@
     }
 
     const API_URL = () => {
-      const user = localStorage.getItem('gh_user');
-      const repo = localStorage.getItem('gh_repo');
+      const user = safeGetLocal('gh_user');
+      const repo = safeGetLocal('gh_repo');
       return `https://api.github.com/repos/${user}/${repo}/contents/projects.json`;
     };
 
     async function fetchProjects() {
-      const token = localStorage.getItem('gh_token');
+      const token = safeGetLocal('gh_token');
       try {
         showStatus('Cargando proyectos...', 'ok');
         const res = await fetch(API_URL(), { headers: { Authorization: `token ${token}` } });
         if (!res.ok) throw new Error('Error al conectar con GitHub.');
         const data = await res.json();
         fileSha = data.sha;
-        projectsData = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+        projectsData = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\s/g, '')))));
 
         generateSkillsDatalist();
         renderList();
@@ -629,7 +692,7 @@
     }
 
     async function saveToGitHub() {
-      const token = localStorage.getItem('gh_token');
+      const token = safeGetLocal('gh_token');
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(projectsData, null, 2))));
       const res = await fetch(API_URL(), {
         method: 'PUT',
@@ -651,9 +714,9 @@
     }
 
     async function uploadImageToGitHub(file) {
-      const token = localStorage.getItem('gh_token');
-      const user = localStorage.getItem('gh_user');
-      const repo = localStorage.getItem('gh_repo');
+      const token = safeGetLocal('gh_token');
+      const user = safeGetLocal('gh_user');
+      const repo = safeGetLocal('gh_repo');
       const filename = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
       const filePath = `assets/img/projects/${filename}`;
       const base64Data = await fileToBase64(file);
@@ -707,13 +770,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (sessionStorage.getItem('admin_logged') === 'true') {
+      if (safeGetSession('admin_logged') === 'true') {
         document.getElementById('pin-screen').style.display = 'none';
-        if (!localStorage.getItem('gh_token')) {
-          document.getElementById('config-screen').style.display = 'flex';
+        if (!hasGithubConfig()) {
+          openConfig();
         } else {
           startApp();
         }
+      } else {
+        document.getElementById('admin-pin').focus();
       }
     });
   </script>
