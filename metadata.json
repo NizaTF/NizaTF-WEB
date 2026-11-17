@@ -1,0 +1,6 @@
+{
+  "name": "Nico Talens Portfolio",
+  "description": "Portfolio de Nico Talens Fresquet (SMX y Desarrollo Web) con contadores de visitas y likes reparados y correcciones generales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

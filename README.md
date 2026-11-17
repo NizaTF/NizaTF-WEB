@@ -1,35 +1,20 @@
-# Nico Talens · Portfolio
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-> Estudiante de Sistemas Microinformáticos y Redes (SMX)
-> Apasionado por el hardware, las redes y el desarrollo web.
+# Run and deploy your AI Studio app
 
-🌐 **Puedes ver la web en vivo aquí: [https://nizatf.github.io/](https://nizatf.github.io/)**
+This contains everything you need to run your app locally.
 
-Este es el repositorio de mi portfolio personal. Una web estática, rápida y construida desde cero para mostrar quién soy, lo que he aprendido durante el ciclo y los proyectos en los que estoy trabajando.
+View your app in AI Studio: https://ai.studio/apps/d9fc82ee-8e37-454f-b18c-fc05519d85e3
 
-## 🛠️ Stack Técnico
+## Run Locally
 
-El proyecto está desarrollado sin frameworks ni dependencias externas. HTML, CSS y JavaScript puro.
+**Prerequisites:**  Node.js
 
-- **Frontend:** HTML5 semántico, CSS3 (Grid, Flexbox, Variables CSS).
-- **Interactividad:** JavaScript nativo (Vanilla JS).
-- **Diseño:** Sistema de diseño propio (*Dev Clean*) con soporte para modo claro y oscuro.
-- **Despliegue:** GitHub Pages.
-- **Formulario:** Integración con Formspree para el envío de correos sin backend.
 
-## ✨ Características
-
-- Diseño totalmente *responsive* (adaptado a móvil, tablet y escritorio).
-- Sistema de temas (claro/oscuro) persistente mediante `localStorage`.
-- Indicador de progreso de scroll y botón "volver arriba".
-- Página de error 404 personalizada.
-- Metadatos SEO y Open Graph configurados para compartir en redes.
-- Protección anti-scraping básica (ofuscación de correo).
-
-## 🚀 Ejecución local
-
-No requiere instalación de dependencias. Solo necesitas un navegador.
-
-1. Clona este repositorio:
-   ```bash
-   git clone https://github.com/NizaTF/nizatf.github.io.git
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
