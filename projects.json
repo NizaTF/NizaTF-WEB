@@ -51,9 +51,9 @@
   {
     "id": "1794956312752",
     "title": "Roll For Ambience (RFA)",
-    "desc": "Esta es una app web para ",
+    "desc": "Una app web de musica, soundboard y muchos mas para mis sesiones de D&D.",
     "link": "https://github.com/NizaTF/Roll-For-Ambience",
-    "blog": "",
+    "blog": "# PLACEHOLDER",
     "images": [
       "assets/img/projects/1794956306228_Capturadepantalla2026-11-17234145.png",
       "assets/img/projects/1794956308099_Capturadepantalla2026-11-17234057.png",
@@ -62,7 +62,7 @@
     ],
     "imageFit": "contain",
     "status": "active",
-    "level": 5,
+    "level": 2,
     "skills": []
   }
 ]
