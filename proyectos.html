@@ -9,7 +9,8 @@
 
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('theme');
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
         document.documentElement.setAttribute('data-theme', 'light');
@@ -128,6 +129,14 @@
     };
 
     const escapeHtml = (str) => window.PortfolioCounters ? window.PortfolioCounters.escapeHtml(str) : String(str);
+    const safeGetLocal = (key) => {
+      if (window.PortfolioCounters && window.PortfolioCounters.safeGetLocal) return window.PortfolioCounters.safeGetLocal(key);
+      try { return localStorage.getItem(key); } catch { return null; }
+    };
+    const safeSetLocal = (key, val) => {
+      if (window.PortfolioCounters && window.PortfolioCounters.safeSetLocal) return window.PortfolioCounters.safeSetLocal(key, val);
+      try { localStorage.setItem(key, val); } catch {}
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -139,30 +148,30 @@
       const tagsContainer = document.getElementById('filter-tags-container');
       const clearBtn = document.getElementById('clear-filters-btn');
 
-      fetch(`projects.json?v=${Date.now()}`)
+      searchInput.addEventListener('input', (e) => {
+        currentSearchText = e.target.value.toLowerCase();
+        filterAndRender();
+      });
+
+      clearBtn.addEventListener('click', () => {
+        currentSearchText = '';
+        currentSkillFilter = null;
+        searchInput.value = '';
+        document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('is-active'));
+        window.history.replaceState({}, document.title, window.location.pathname);
+        filterAndRender();
+      });
+
+      fetch(`projects.json?v=${Date.now()}`, { cache: 'no-store' })
         .then(res => {
           if (!res.ok) throw new Error('HTTP ' + res.status);
           return res.json();
         })
-        .then(async projects => {
+        .then(projects => {
           allProjects = Array.isArray(projects) ? projects : [];
           generateFilterTags();
           filterAndRender();
-          await cargarLikes();
-
-          searchInput.addEventListener('input', (e) => {
-            currentSearchText = e.target.value.toLowerCase();
-            filterAndRender();
-          });
-
-          clearBtn.addEventListener('click', () => {
-            currentSearchText = '';
-            currentSkillFilter = null;
-            searchInput.value = '';
-            document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('is-active'));
-            window.history.replaceState({}, document.title, window.location.pathname);
-            filterAndRender();
-          });
+          cargarLikes();
         })
         .catch(() => {
           grid.innerHTML = `<p style="color: var(--accent);">Error al cargar los proyectos.</p>`;
@@ -215,12 +224,12 @@
           return matchesSearch && matchesSkill;
         });
 
-        grid.innerHTML = '';
         if (filtered.length === 0) {
           grid.innerHTML = `<p style="color: var(--text-muted); font-family: var(--font-mono); grid-column: 1/-1; text-align: center; padding: 40px;">No se han encontrado proyectos.</p>`;
           return;
         }
 
+        let cardsHtml = '';
         filtered.forEach((p, index) => {
           const st = statusMap[p.status] || statusMap.inactive;
           let dotsLvl = '';
@@ -233,12 +242,12 @@
           let navHTML = '';
           let dotsHTML = '';
 
-          const projectImages = p.images || (p.image ? [p.image] : []);
+          const projectImages = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
           const fitMode = p.imageFit === 'contain' ? 'contain' : 'cover';
 
           if (projectImages.length > 0) {
             projectImages.forEach((imgUrl, i) => {
-              imagesHTML += `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title)}" style="object-fit: ${fitMode};" class="${i === 0 ? 'active' : ''}" onerror="this.src='/assets/img/placeholder.webp'">`;
+              imagesHTML += `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title || '')}" style="object-fit: ${fitMode};" class="${i === 0 ? 'active' : ''}" onerror="this.onerror=null;this.src='assets/img/placeholder.webp'">`;
             });
 
             if (projectImages.length > 1) {
@@ -256,14 +265,15 @@
             }
           }
 
-          const safeId = escapeHtml(p.id);
-          const hasLiked = localStorage.getItem(`liked_${p.id}`) === 'true';
+          const rawId = String(p.id || index);
+          const safeId = escapeHtml(rawId);
+          const hasLiked = safeGetLocal(`liked_${rawId}`) === 'true';
           const heartIcon = hasLiked ? '❤️' : '🤍';
           const likedClass = hasLiked ? 'is-liked' : '';
-          const initialCount = typeof cachedLikes[p.id] === 'number' ? cachedLikes[p.id] : '...';
+          const initialCount = typeof cachedLikes[rawId] === 'number' ? cachedLikes[rawId] : '...';
 
-          const card = `
-            <a class="project-card" href="proyecto.html?id=${encodeURIComponent(p.id)}" id="proj-card-${index}">
+          cardsHtml += `
+            <a class="project-card" href="proyecto.html?id=${encodeURIComponent(rawId)}" id="proj-card-${index}">
               <div class="project-thumb project-carousel" data-current="0">
                 <button type="button" class="card-like-btn ${likedClass}" data-id="${safeId}" aria-label="Me gusta" onclick="toggleLike(event, this, '${safeId}')">
                   <span class="like-icon">${heartIcon}</span>
@@ -279,16 +289,16 @@
                   <div class="badge-level" title="Nivel: ${level}/5"><span class="badge-label">nivel</span>${dotsLvl}</div>
                 </div>
                 <div class="project-top">
-                  <h2 class="project-title">${escapeHtml(p.title)}</h2>
+                  <h2 class="project-title">${escapeHtml(p.title || 'Sin título')}</h2>
                   <span class="project-arrow" aria-hidden="true">↗</span>
                 </div>
-                <p class="project-desc">${escapeHtml(p.desc)}</p>
+                <p class="project-desc">${escapeHtml(p.desc || '')}</p>
               </div>
             </a>
           `;
-          grid.innerHTML += card;
         });
 
+        grid.innerHTML = cardsHtml;
         applyCachedLikesToDOM();
         startCarousels();
       }
@@ -338,7 +348,7 @@
 
       const countEl = document.getElementById(`like-count-${id}`);
       const iconEl = btnElement.querySelector('.like-icon');
-      const alreadyLiked = localStorage.getItem(`liked_${id}`) === 'true';
+      const alreadyLiked = safeGetLocal(`liked_${id}`) === 'true';
       const nextLiked = !alreadyLiked;
 
       try {
@@ -347,7 +357,7 @@
         if (countEl) countEl.textContent = String(newCount);
         if (iconEl) iconEl.textContent = nextLiked ? '❤️' : '🤍';
         btnElement.classList.toggle('is-liked', nextLiked);
-        localStorage.setItem(`liked_${id}`, String(nextLiked));
+        safeSetLocal(`liked_${id}`, String(nextLiked));
       } catch {
         // Mantener estado actual si falla
       } finally {

@@ -10,7 +10,8 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('theme');
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
         document.documentElement.setAttribute('data-theme', 'light');
@@ -82,13 +83,22 @@
         return;
       }
 
-      fetch(`projects.json?v=${Date.now()}`)
+      const safeGetLocal = (key) => {
+        if (window.PortfolioCounters && window.PortfolioCounters.safeGetLocal) return window.PortfolioCounters.safeGetLocal(key);
+        try { return localStorage.getItem(key); } catch { return null; }
+      };
+      const safeSetLocal = (key, val) => {
+        if (window.PortfolioCounters && window.PortfolioCounters.safeSetLocal) return window.PortfolioCounters.safeSetLocal(key, val);
+        try { localStorage.setItem(key, val); } catch {}
+      };
+
+      fetch(`projects.json?v=${Date.now()}`, { cache: 'no-store' })
         .then(res => {
           if (!res.ok) throw new Error('HTTP ' + res.status);
           return res.json();
         })
         .then(async projects => {
-          const p = projects.find(proj => proj.id === projectId);
+          const p = projects.find(proj => String(proj.id) === String(projectId));
 
           if (!p) {
             container.innerHTML = `<div class="section"><h2 style="text-align:center;">Proyecto no encontrado</h2><p style="text-align:center; margin-top:20px;"><a href="proyectos.html" class="btn btn-primary">Volver a proyectos</a></p></div>`;
@@ -97,13 +107,13 @@
 
           document.title = `${p.title} · Nico Talens`;
 
-          const projectImages = p.images || (p.image ? [p.image] : []);
+          const projectImages = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
           const fitMode = p.imageFit === 'contain' ? 'contain' : 'cover';
           let imagesHTML = '';
 
           if (projectImages.length > 0) {
             projectImages.forEach((imgUrl, i) => {
-              imagesHTML += `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title)}" style="object-fit: ${fitMode};" class="${i === 0 ? 'active' : ''}" onerror="this.src='/assets/img/placeholder.webp'">`;
+              imagesHTML += `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title || '')}" style="object-fit: ${fitMode};" class="${i === 0 ? 'active' : ''}" onerror="this.onerror=null;this.src='assets/img/placeholder.webp'">`;
             });
           }
 
@@ -119,7 +129,7 @@
             dotsLvl += `<span class="lvl-dot ${i <= level ? 'is-on' : ''}"></span>`;
           }
 
-          const hasLiked = localStorage.getItem(`liked_${p.id}`) === 'true';
+          const hasLiked = safeGetLocal(`liked_${p.id}`) === 'true';
           const skillsHTML = Array.isArray(p.skills) && p.skills.length > 0
             ? `<div class="blog-skills-row">${p.skills.map(s => `<a href="proyectos.html?skill=${encodeURIComponent(s)}" class="blog-skill-chip">${escapeHtml(s)}</a>`).join('')}</div>`
             : '';
@@ -187,14 +197,14 @@
               if (pending) return;
               pending = true;
               likeBtn.disabled = true;
-              const currentlyLiked = localStorage.getItem(`liked_${p.id}`) === 'true';
+              const currentlyLiked = safeGetLocal(`liked_${p.id}`) === 'true';
               const nextLiked = !currentlyLiked;
               try {
                 const updated = await window.PortfolioCounters.setProjectLike(p.id, nextLiked);
                 if (likeCountEl) likeCountEl.textContent = String(updated);
                 if (likeIconEl) likeIconEl.textContent = nextLiked ? '❤️' : '🤍';
                 likeBtn.classList.toggle('is-liked', nextLiked);
-                localStorage.setItem(`liked_${p.id}`, String(nextLiked));
+                safeSetLocal(`liked_${p.id}`, String(nextLiked));
               } catch {
                 // Mantener estado previo
               } finally {

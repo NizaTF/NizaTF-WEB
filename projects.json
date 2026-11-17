@@ -47,22 +47,5 @@
       "Seguridad",
       "Documentación"
     ]
-  },
-  {
-    "id": "1794955346164",
-    "title": "Roll-For-Ambience (RFA)",
-    "desc": "Una app web pensada para mobil para poner musica, sonidos y efectos a mis sesiones de D&D.",
-    "link": "https://github.com/NizaTF/Roll-For-Ambience",
-    "blog": "# Placeholder",
-    "images": [
-      "assets/img/projects/1794955339002_Capturadepantalla2026-11-17234041.png",
-      "assets/img/projects/1794955340931_Capturadepantalla2026-11-17234057.png",
-      "assets/img/projects/1794955342267_Capturadepantalla2026-11-17234012.png",
-      "assets/img/projects/1794955343873_Capturadepantalla2026-11-17234145.png"
-    ],
-    "imageFit": "contain",
-    "status": "active",
-    "level": 3,
-    "skills": []
   }
 ]

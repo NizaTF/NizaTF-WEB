@@ -107,7 +107,22 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
   const PUBLIC_COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
   const PUBLIC_KEY_PREFIX = 'nizatf-portfolio';
   let visitPromise = null;
-  let hasLocalBackend = null;
+  let hasLocalBackend = window.location.hostname.endsWith('.github.io') ? false : null;
+
+  function safeStorageGet(type, key) {
+    try {
+      const storage = type === 'session' ? window.sessionStorage : window.localStorage;
+      return storage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+  function safeStorageSet(type, key, val) {
+    try {
+      const storage = type === 'session' ? window.sessionStorage : window.localStorage;
+      storage.setItem(key, val);
+    } catch {}
+  }
 
   function parseCounterValue(payload) {
     if (!payload || typeof payload !== 'object') return null;
@@ -186,7 +201,7 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
     if (visitPromise) return visitPromise;
 
     visitPromise = (async () => {
-      const alreadyCounted = sessionStorage.getItem(VISIT_SESSION_KEY) === '1';
+      const alreadyCounted = safeStorageGet('session', VISIT_SESSION_KEY) === '1';
       try {
         let count = null;
         if (!alreadyCounted) {
@@ -197,8 +212,8 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
             count = await remoteUp('visits');
           }
           if (count !== null) {
-            sessionStorage.setItem(VISIT_SESSION_KEY, '1');
-            sessionStorage.setItem(VISIT_CACHE_KEY, String(count));
+            safeStorageSet('session', VISIT_SESSION_KEY, '1');
+            safeStorageSet('session', VISIT_CACHE_KEY, String(count));
             return count;
           }
         } else {
@@ -209,12 +224,12 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
             count = await remoteGet('visits');
           }
           if (count !== null) {
-            sessionStorage.setItem(VISIT_CACHE_KEY, String(count));
+            safeStorageSet('session', VISIT_CACHE_KEY, String(count));
             return count;
           }
         }
       } catch {
-        const cached = sessionStorage.getItem(VISIT_CACHE_KEY);
+        const cached = safeStorageGet('session', VISIT_CACHE_KEY);
         if (cached !== null) return Number(cached);
       }
       return null;
@@ -280,6 +295,8 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
     getProjectLikes,
     setProjectLike,
     escapeHtml,
+    safeGetLocal: (key) => safeStorageGet('local', key),
+    safeSetLocal: (key, val) => safeStorageSet('local', key, val),
   };
 
   // --- LIMPIEZA BFCACHE (Botón Atrás del navegador) ---
@@ -295,25 +312,25 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
     const logoDinamico = document.getElementById('logo-dinamico');
 
     // --- 1. DETECTAR Y APLICAR TEMA ---
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = safeStorageGet('local', 'theme');
     const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
     const initialTheme = savedTheme || (systemPrefersLight ? 'light' : 'dark');
 
     function updateAssets(theme) {
       if (dynamicFavicon) {
-        const newIcon = theme === 'dark' ? '/assets/img/favicon_oscuro.png' : '/assets/img/favicon_claro.png';
+        const newIcon = theme === 'dark' ? 'assets/img/favicon_oscuro.png' : 'assets/img/favicon_claro.png';
         if (!dynamicFavicon.href.includes(newIcon)) {
           dynamicFavicon.href = `${newIcon}?v=${Date.now()}`;
         }
       }
       if (logoDinamico) {
-        logoDinamico.src = theme === 'dark' ? '/assets/img/logo_oscuro.png' : '/assets/img/logo_claro.png';
+        logoDinamico.src = theme === 'dark' ? 'assets/img/logo_oscuro.png' : 'assets/img/logo_claro.png';
       }
     }
 
     function updateIcon(theme) {
       if (themeToggle) {
-        const iconSrc = theme === 'dark' ? '/assets/img/boton_oscuro.png' : '/assets/img/boton_claro.png';
+        const iconSrc = theme === 'dark' ? 'assets/img/boton_oscuro.png' : 'assets/img/boton_claro.png';
         let iconImg = document.getElementById('theme-icon-img');
         if (!iconImg) {
           themeToggle.innerHTML = `<img id="theme-icon-img" src="${iconSrc}" alt="Cambiar tema" class="theme-icon-img">`;
@@ -331,7 +348,7 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
       themeToggle.addEventListener('click', () => {
         const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        safeStorageSet('local', 'theme', newTheme);
         updateIcon(newTheme);
       });
     }

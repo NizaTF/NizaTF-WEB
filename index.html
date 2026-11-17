@@ -41,7 +41,8 @@
 
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('theme');
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
         document.documentElement.setAttribute('data-theme', 'light');
@@ -268,10 +269,12 @@
         const visits = await window.PortfolioCounters.ensureVisitCounted();
         let projectIds = [];
         try {
-          const projRes = await fetch(`projects.json?v=${Date.now()}`);
+          const projRes = await fetch(`projects.json?v=${Date.now()}`, { cache: 'no-store' });
           if (projRes.ok) {
             const projects = await projRes.json();
-            projectIds = projects.map(p => p.id);
+            if (Array.isArray(projects)) {
+              projectIds = projects.map(p => p.id);
+            }
           }
         } catch {}
 
