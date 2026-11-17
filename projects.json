@@ -47,5 +47,22 @@
       "Seguridad",
       "Documentación"
     ]
+  },
+  {
+    "id": "1794956312752",
+    "title": "Roll For Ambience (RFA)",
+    "desc": "Esta es una app web para ",
+    "link": "https://github.com/NizaTF/Roll-For-Ambience",
+    "blog": "",
+    "images": [
+      "assets/img/projects/1794956306228_Capturadepantalla2026-11-17234145.png",
+      "assets/img/projects/1794956308099_Capturadepantalla2026-11-17234057.png",
+      "assets/img/projects/1794956309676_Capturadepantalla2026-11-17234041.png",
+      "assets/img/projects/1794956311174_Capturadepantalla2026-11-17234012.png"
+    ],
+    "imageFit": "contain",
+    "status": "active",
+    "level": 5,
+    "skills": []
   }
 ]
