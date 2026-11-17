@@ -6,9 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <title>Habilidades · Nico Talens</title>
-  
+
   <script>
-    // Evitar el parpadeo (FOUC) al cargar la página
     (function() {
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -19,19 +18,16 @@
       }
     })();
   </script>
-  
-  <!-- Favicon Dinámico -->
+
   <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
 
-  <!-- SEO Básico -->
   <meta name="description" content="Portfolio de Nico Talens, estudiante de Sistemas Microinformáticos y Redes (SMX). Especializado en hardware, redes y desarrollo web.">
   <meta name="author" content="Nico Talens">
 
-  <!-- Open Graph (Para LinkedIn, WhatsApp, etc.) -->
   <meta property="og:title" content="Nico Talens · Portfolio">
   <meta property="og:description" content="Estudiante de SMX apasionado por la informática, las redes y el desarrollo web.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/img/image.png"> 
+  <meta property="og:image" content="assets/img/image.png">
 </head>
 
 <body>
@@ -45,7 +41,7 @@
       <a href="habilidades.html" class="active">Habilidades</a>
       <a href="contacto.html">Contacto</a>
     </div>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">☀️</button>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema"></button>
   </nav>
 
   <!-- CABECERA -->
@@ -133,32 +129,32 @@
     </div>
 
     <div class="tabs-layout">
-      
+
       <!-- Menú de Asignaturas (Izquierda) -->
       <div class="tabs-nav">
-        <button class="tab-btn active" data-target="tab-hardware">
+        <button type="button" class="tab-btn active" data-target="tab-hardware">
           <span class="tab-icon">🔧</span> Hardware y Ofimática
         </button>
-        <button class="tab-btn" data-target="tab-sistemas">
+        <button type="button" class="tab-btn" data-target="tab-sistemas">
           <span class="tab-icon">🖥️</span> Sistemas y Virtualización
         </button>
-        <button class="tab-btn" data-target="tab-redes">
+        <button type="button" class="tab-btn" data-target="tab-redes">
           <span class="tab-icon">🌐</span> Redes y Comunicaciones
         </button>
-        <button class="tab-btn" data-target="tab-seguridad">
+        <button type="button" class="tab-btn" data-target="tab-seguridad">
           <span class="tab-icon">🔒</span> Ciberseguridad
         </button>
-        <button class="tab-btn" data-target="tab-web">
+        <button type="button" class="tab-btn" data-target="tab-web">
           <span class="tab-icon">💻</span> Desarrollo Web
         </button>
-        <button class="tab-btn" data-target="tab-proyecto">
+        <button type="button" class="tab-btn" data-target="tab-proyecto">
           <span class="tab-icon">📋</span> Transversales
         </button>
       </div>
 
       <!-- Paneles de Contenido (Derecha) -->
       <div class="tabs-content">
-        
+
         <!-- Panel Hardware y Ofimática -->
         <div class="tab-panel active" id="tab-hardware">
           <div class="panel-header">
@@ -167,13 +163,9 @@
           </div>
           <p class="panel-desc">Montaje de equipos, mantenimiento y suites de oficina.</p>
           <div class="panel-skills">
-            <div class="skill-pill" onclick="filterProjects('Montaje')">
-              <span>🔩 Montaje de Equipos</span>
-              <span class="skill-count" data-skill="Montaje"></span>
-            </div>
-            <div class="skill-pill" onclick="filterProjects('Diagnóstico')">
-              <span>🩺 Diagnóstico y Mantenimiento</span>
-              <span class="skill-count" data-skill="Diagnóstico"></span>
+            <div class="skill-pill" onclick="filterProjects('Hardware')">
+              <span>🔩 Hardware, Montaje y Diagnóstico</span>
+              <span class="skill-count" data-skill="Hardware"></span>
             </div>
             <div class="skill-pill" onclick="filterProjects('Ofimática')">
               <span>📄 Word / Excel / LibreOffice</span>
@@ -190,6 +182,10 @@
           </div>
           <p class="panel-desc">Administración de entornos operativos, servidores y máquinas virtuales.</p>
           <div class="panel-skills">
+            <div class="skill-pill" onclick="filterProjects('Sistemas Operativos')">
+              <span>🖥️ Sistemas Operativos (Administración)</span>
+              <span class="skill-count" data-skill="Sistemas Operativos"></span>
+            </div>
             <div class="skill-pill" onclick="filterProjects('Windows')">
               <span>🪟 Windows 10 / 11 / Server</span>
               <span class="skill-count" data-skill="Windows"></span>
@@ -260,6 +256,10 @@
           </div>
           <p class="panel-desc">Protección de sistemas, auditoría y análisis de vulnerabilidades.</p>
           <div class="panel-skills">
+            <div class="skill-pill" onclick="filterProjects('Seguridad')">
+              <span>🔒 Seguridad Informática</span>
+              <span class="skill-count" data-skill="Seguridad"></span>
+            </div>
             <div class="skill-pill" onclick="filterProjects('Firewalls')">
               <span>🛡️ Firewalls / Antivirus</span>
               <span class="skill-count" data-skill="Firewalls"></span>
@@ -307,6 +307,14 @@
               <span>🌿 Control de Versiones (Git)</span>
               <span class="skill-count" data-skill="Git"></span>
             </div>
+            <div class="skill-pill" onclick="filterProjects('GitHub API')">
+              <span>🔌 GitHub API</span>
+              <span class="skill-count" data-skill="GitHub API"></span>
+            </div>
+            <div class="skill-pill" onclick="filterProjects('Diseño UI/UX')">
+              <span>✨ Diseño UI/UX</span>
+              <span class="skill-count" data-skill="Diseño UI/UX"></span>
+            </div>
           </div>
         </div>
 
@@ -321,6 +329,10 @@
             <div class="skill-pill" onclick="filterProjects('Gestión de Proyectos')">
               <span>📊 Gestión de Proyectos</span>
               <span class="skill-count" data-skill="Gestión de Proyectos"></span>
+            </div>
+            <div class="skill-pill" onclick="filterProjects('Documentación')">
+              <span>📝 Documentación Técnica</span>
+              <span class="skill-count" data-skill="Documentación"></span>
             </div>
             <div class="skill-pill" onclick="filterProjects('Sostenibilidad')">
               <span>♻️ Sostenibilidad</span>
@@ -341,11 +353,10 @@
     </div>
   </section>
 
-    <footer class="footer">
+  <footer class="footer">
     <div class="footer-content">
       <p>© 2026 · Nico Talens · Hecho con HTML &amp; CSS</p>
-      
-      <!-- WIDGET DE ESTADO DEL SISTEMA -->
+
       <div class="sys-status">
         <span class="sys-item">
           <span class="sys-dot"></span>
@@ -358,14 +369,12 @@
       </div>
     </div>
   </footer>
-  
+
   <button id="back-to-top" aria-label="Volver arriba">↑</button>
   <script src="ui.js"></script>
 
-  <!-- SCRIPT DE LAS PESTAÑAS Y CONTADORES -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // 1. Lógica de las pestañas
+    document.addEventListener('DOMContentLoaded', () => {
       const tabBtns = document.querySelectorAll('.tab-btn');
       const tabPanels = document.querySelectorAll('.tab-panel');
 
@@ -373,28 +382,26 @@
         btn.addEventListener('click', () => {
           tabBtns.forEach(b => b.classList.remove('active'));
           tabPanels.forEach(p => p.classList.remove('active'));
-
           btn.classList.add('active');
           const targetId = btn.dataset.target;
           document.getElementById(targetId).classList.add('active');
         });
       });
 
-      // 2. Redirigir a proyectos con el filtro
       window.filterProjects = (skillName) => {
         window.location.href = `proyectos.html?skill=${encodeURIComponent(skillName)}`;
       };
 
-      // 3. Contar proyectos por habilidad
-      fetch(`projects.json?v=${new Date().getTime()}`)
+      fetch(`projects.json?v=${Date.now()}`)
         .then(res => res.json())
         .then(projects => {
           const counters = document.querySelectorAll('.skill-count');
-          
           counters.forEach(counter => {
-            const skillName = counter.dataset.skill;
-            const count = projects.filter(p => p.skills && p.skills.includes(skillName)).length;
-            
+            const skillName = (counter.dataset.skill || '').toLowerCase();
+            const count = projects.filter(p =>
+              Array.isArray(p.skills) && p.skills.some(s => s.toLowerCase() === skillName)
+            ).length;
+
             if (count > 0) {
               counter.textContent = `${count} proyecto${count > 1 ? 's' : ''}`;
             } else {
@@ -402,7 +409,7 @@
             }
           });
         })
-        .catch(err => console.log("Error cargando proyectos:", err));
+        .catch(() => {});
     });
   </script>
 </body>

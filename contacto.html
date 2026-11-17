@@ -6,9 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <title>Contacto · Nico Talens</title>
-  
+
   <script>
-    // Evitar el parpadeo (FOUC) al cargar la página
     (function() {
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -19,19 +18,16 @@
       }
     })();
   </script>
-  
-  <!-- Favicon Dinámico -->
+
   <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
 
-  <!-- SEO Básico -->
   <meta name="description" content="Portfolio de Nico Talens, estudiante de Sistemas Microinformáticos y Redes (SMX). Especializado en hardware, redes y desarrollo web.">
   <meta name="author" content="Nico Talens">
 
-  <!-- Open Graph (Para LinkedIn, WhatsApp, etc.) -->
   <meta property="og:title" content="Nico Talens · Portfolio">
   <meta property="og:description" content="Estudiante de SMX apasionado por la informática, las redes y el desarrollo web.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/img/image.png"> 
+  <meta property="og:image" content="assets/img/image.png">
 </head>
 
 <body>
@@ -45,7 +41,7 @@
       <a href="habilidades.html">Habilidades</a>
       <a href="contacto.html" class="active">Contacto</a>
     </div>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">☀️</button>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema"></button>
   </nav>
 
   <!-- CABECERA -->
@@ -66,7 +62,6 @@
     </div>
 
     <div class="contact-grid">
-
       <a href="mailto:nicotalensfresquet@gmail.com" class="card contact-card">
         <div class="card-icon">✉️</div>
         <div class="contact-info">
@@ -102,7 +97,6 @@
         </div>
         <span class="contact-arrow is-off" aria-hidden="true">·</span>
       </div>
-
     </div>
   </section>
 
@@ -135,7 +129,6 @@
     </div>
 
     <form class="contact-form" id="contact-form" action="https://formspree.io/f/xgaojlwg" method="POST">
-
       <input type="hidden" name="_subject" value="Nuevo mensaje desde tu portfolio">
       <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
 
@@ -157,14 +150,14 @@
       </div>
 
       <button type="submit" class="btn btn-primary">Enviar mensaje</button>
+      <div id="contact-error" class="form-error" role="alert" style="display: none;"></div>
     </form>
   </section>
 
-    <footer class="footer">
+  <footer class="footer">
     <div class="footer-content">
       <p>© 2026 · Nico Talens · Hecho con HTML &amp; CSS</p>
-      
-      <!-- WIDGET DE ESTADO DEL SISTEMA -->
+
       <div class="sys-status">
         <span class="sys-item">
           <span class="sys-dot"></span>
@@ -179,16 +172,18 @@
   </footer>
 
   <button id="back-to-top" aria-label="Volver arriba">↑</button>
-  
+
   <script src="ui.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('contact-form');
       const submitButton = form.querySelector('button[type="submit"]');
+      const errorBox = document.getElementById('contact-error');
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        errorBox.style.display = 'none';
         submitButton.disabled = true;
         submitButton.textContent = 'Enviando...';
 
@@ -202,10 +197,7 @@
           });
 
           if (response.ok) {
-            // Ocultar el formulario
             form.style.display = 'none';
-
-            // Crear el bloque de éxito DINÁMICAMENTE (no existe en el HTML)
             const success = document.createElement('div');
             success.className = 'form-success';
             success.setAttribute('role', 'status');
@@ -213,17 +205,17 @@
               <span class="success-icon">✓</span>
               <p>¡Mensaje enviado! Te responderé lo antes posible.</p>
             `;
-
-            // Insertarlo justo después del formulario
             form.parentNode.insertBefore(success, form.nextSibling);
           } else {
-            const errorData = await response.json();
-            alert('Error al enviar: ' + (errorData.error || 'Inténtalo de nuevo.'));
+            const errorData = await response.json().catch(() => ({}));
+            errorBox.textContent = 'Error al enviar: ' + (errorData.error || 'Inténtalo de nuevo.');
+            errorBox.style.display = 'block';
             submitButton.disabled = false;
             submitButton.textContent = 'Enviar mensaje';
           }
-        } catch (error) {
-          alert('Error de conexión. Revisa tu internet e inténtalo de nuevo.');
+        } catch {
+          errorBox.textContent = 'Error de conexión. Revisa tu internet e inténtalo de nuevo.';
+          errorBox.style.display = 'block';
           submitButton.disabled = false;
           submitButton.textContent = 'Enviar mensaje';
         }
@@ -231,4 +223,5 @@
     });
   </script>
 </body>
+
 </html>

@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <title>Admin · Panel de Control</title>
-  
+  <title>Admin · Studio CMS</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-
   <script>
     (function() {
       const savedTheme = localStorage.getItem('theme');
@@ -20,12 +18,9 @@
       }
     })();
   </script>
-  
   <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
-  
   <style>
-    /* LAYOUT APP */
-    body { margin: 0; padding: 0; overflow: hidden; height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-sans); }
+    body { margin: 0; padding: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-sans); }
     .theme-toggle { position: fixed; top: 15px; right: 20px; z-index: 1000; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-md); }
     .theme-icon-img { width: 24px; height: 24px; object-fit: contain; }
 
@@ -57,7 +52,7 @@
     .form-field input, .form-field textarea, .form-field select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px; font-family: var(--font-sans); font-size: 14px; color: var(--text); box-sizing: border-box; outline: none; }
     .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    
+
     .image-manager-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
     .image-item { display: flex; align-items: center; gap: 10px; background: var(--surface-2); padding: 8px; border-radius: var(--r-sm); border: 1px solid var(--border); cursor: grab; }
     .image-item.sortable-ghost { opacity: 0.4; border-style: dashed; border-color: var(--accent); }
@@ -102,9 +97,9 @@
 
     @media (max-width: 900px) {
       .dashboard-layout { grid-template-columns: 1fr; }
-      .sidebar { display: none; } 
+      .sidebar { display: none; }
       .editor-body { grid-template-columns: 1fr; }
-      .preview-area { display: none; } 
+      .preview-area { display: none; }
       .editor-header { padding-right: 80px; flex-direction: column; align-items: flex-start; gap: 10px; }
     }
   </style>
@@ -119,7 +114,7 @@
       <p>Introduce el PIN de administrador.</p>
       <input type="password" id="admin-pin" class="pin-input" maxlength="20" placeholder="••••" autocomplete="off">
       <button class="btn btn-primary" style="width: 100%;" onclick="checkPin()">Desbloquear</button>
-      <p id="pin-error" style="display: none;">PIN incorrecto.</p>
+      <p id="pin-error" style="display: none; color: var(--accent); margin-top: 12px;">PIN incorrecto.</p>
     </div>
   </div>
 
@@ -139,13 +134,14 @@
         <label>Token (Fine-grained)</label>
         <input type="password" id="gh-token" placeholder="github_pat_...">
       </div>
+      <p id="config-error" style="display: none; color: var(--accent); margin-bottom: 10px;"></p>
       <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="saveConfig()">Conectar y Entrar</button>
     </div>
   </div>
 
   <div id="admin-app">
     <div class="dashboard-layout">
-      
+
       <aside class="sidebar">
         <div class="sidebar-header">
           <h2>📦 Proyectos</h2>
@@ -157,14 +153,12 @@
       <main class="main-editor">
         <header class="editor-header">
           <h1 id="editor-title">Editando Proyecto</h1>
-          
+
           <div class="header-actions">
             <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importJSON(event)">
-            
             <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="exportJSON()">📥 Backup</button>
             <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px;" onclick="document.getElementById('import-file').click()">📤 Importar</button>
             <button class="btn btn-secondary" style="padding: 8px 12px; font-size: 12px; border-color: var(--accent); color: var(--accent);" onclick="logout()">🚪 Salir</button>
-            
             <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="saveProject()" id="save-btn">💾 Guardar</button>
           </div>
         </header>
@@ -172,7 +166,7 @@
         <div class="editor-body">
           <div class="form-scroll">
             <input type="hidden" id="proj-id">
-            
+
             <div class="form-row">
               <div class="form-field">
                 <label>Título del Proyecto</label>
@@ -232,7 +226,7 @@
               <input type="file" id="proj-images-file" accept="image/*" multiple onchange="handleFilesSelect(event)">
               <div class="image-manager-list" id="image-manager-list"></div>
             </div>
-            
+
             <div class="status-msg" id="status-msg"></div>
           </div>
 
@@ -261,17 +255,44 @@
   </div>
 
   <script>
-    const ADMIN_PIN = "1234"; 
+    const ADMIN_PIN = '1234';
     let projectsData = [];
     let fileSha = null;
-    let currentImages = []; 
+    let currentImages = [];
     let previewIndex = 0;
 
-    function logout() {
-      if(confirm('¿Cerrar sesión de administrador?')) {
-        sessionStorage.removeItem('admin_logged');
-        window.location.reload();
+    // Tema aislado para admin (sin sumar visitas ni mostrar widget flotante)
+    (function initAdminTheme() {
+      const html = document.documentElement;
+      const toggle = document.getElementById('theme-toggle');
+      const favicon = document.getElementById('dynamic-favicon');
+
+      function applyTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        const iconSrc = theme === 'dark' ? '/assets/img/boton_oscuro.png' : '/assets/img/boton_claro.png';
+        if (toggle) {
+          toggle.innerHTML = `<img src="${iconSrc}" alt="Cambiar tema" class="theme-icon-img">`;
+        }
+        if (favicon) {
+          favicon.href = theme === 'dark' ? '/assets/img/favicon_oscuro.png' : '/assets/img/favicon_claro.png';
+        }
       }
+
+      const initial = html.getAttribute('data-theme') || 'dark';
+      applyTheme(initial);
+
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('theme', next);
+          applyTheme(next);
+        });
+      }
+    })();
+
+    function logout() {
+      sessionStorage.removeItem('admin_logged');
+      window.location.reload();
     }
 
     function checkPin() {
@@ -298,8 +319,16 @@
       const user = document.getElementById('gh-user').value.trim();
       const repo = document.getElementById('gh-repo').value.trim();
       const token = document.getElementById('gh-token').value.trim();
-      if (!user || !repo || !token) return alert('Rellena todos los campos.');
-      localStorage.setItem('gh_user', user); localStorage.setItem('gh_repo', repo); localStorage.setItem('gh_token', token);
+      const errEl = document.getElementById('config-error');
+      if (!user || !repo || !token) {
+        errEl.textContent = 'Rellena todos los campos.';
+        errEl.style.display = 'block';
+        return;
+      }
+      errEl.style.display = 'none';
+      localStorage.setItem('gh_user', user);
+      localStorage.setItem('gh_repo', repo);
+      localStorage.setItem('gh_token', token);
       document.getElementById('config-screen').style.display = 'none';
       startApp();
     }
@@ -319,17 +348,19 @@
       const token = localStorage.getItem('gh_token');
       try {
         showStatus('Cargando proyectos...', 'ok');
-        const res = await fetch(API_URL(), { headers: { 'Authorization': `token ${token}` } });
-        if (!res.ok) throw new Error('Error al conectar.');
+        const res = await fetch(API_URL(), { headers: { Authorization: `token ${token}` } });
+        if (!res.ok) throw new Error('Error al conectar con GitHub.');
         const data = await res.json();
         fileSha = data.sha;
         projectsData = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-        
+
         generateSkillsDatalist();
         renderList();
-        if(projectsData.length > 0) editProject(0); else resetForm();
+        if (projectsData.length > 0) editProject(0); else resetForm();
         showStatus('Proyectos cargados.', 'ok');
-      } catch (err) { showStatus(err.message, 'err'); }
+      } catch (err) {
+        showStatus(err.message, 'err');
+      }
     }
 
     function renderList() {
@@ -343,10 +374,17 @@
           item.classList.add('active');
           editProject(index);
         };
-        item.innerHTML = `
-          <h3>${p.title}</h3>
-          <button class="del-btn" onclick="event.stopPropagation(); deleteProject(${index})">×</button>
-        `;
+        const titleEl = document.createElement('h3');
+        titleEl.textContent = p.title;
+        const delBtn = document.createElement('button');
+        delBtn.className = 'del-btn';
+        delBtn.textContent = '×';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteProject(index);
+        };
+        item.appendChild(titleEl);
+        item.appendChild(delBtn);
         list.appendChild(item);
       });
     }
@@ -364,10 +402,10 @@
       document.getElementById('proj-skills').value = p.skills ? p.skills.join(', ') : '';
       document.getElementById('proj-blog').value = p.blog || '';
       document.getElementById('md-preview-box').style.display = 'none';
-      
+
       currentImages = [];
       if (p.images && Array.isArray(p.images)) {
-        currentImages = p.images.map(url => ({ id: Date.now()+Math.random(), url, file: null, isNew: false }));
+        currentImages = p.images.map(url => ({ id: Date.now() + Math.random(), url, file: null, isNew: false }));
       }
       previewIndex = 0;
       document.getElementById('proj-images-file').value = '';
@@ -384,11 +422,11 @@
       document.getElementById('proj-status').value = 'active';
       document.getElementById('proj-level').value = '5';
       document.getElementById('proj-fit').value = 'cover';
-      document.getElementById('proj-skills').value = ''; 
+      document.getElementById('proj-skills').value = '';
       document.getElementById('proj-blog').value = '';
       document.getElementById('md-preview-box').style.display = 'none';
-      
-      currentImages.forEach(img => { if(img.isNew) URL.revokeObjectURL(img.url) });
+
+      currentImages.forEach(img => { if (img.isNew) URL.revokeObjectURL(img.url); });
       currentImages = [];
       previewIndex = 0;
       document.getElementById('proj-images-file').value = '';
@@ -400,9 +438,9 @@
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const url = URL.createObjectURL(file);
-        currentImages.push({ id: Date.now() + '_' + i, url: url, file: file, isNew: true });
+        currentImages.push({ id: Date.now() + '_' + i, url, file, isNew: true });
       }
-      event.target.value = ''; 
+      event.target.value = '';
       renderImageManager();
     }
 
@@ -430,7 +468,8 @@
 
       if (window.Sortable) {
         new Sortable(list, {
-          animation: 150, ghostClass: 'sortable-ghost',
+          animation: 150,
+          ghostClass: 'sortable-ghost',
           onEnd: function () {
             const newOrder = [];
             list.querySelectorAll('.image-item').forEach(item => {
@@ -447,7 +486,7 @@
     function removeImage(id) {
       const index = currentImages.findIndex(img => img.id == id);
       if (index > -1) {
-        if(currentImages[index].isNew) URL.revokeObjectURL(currentImages[index].url);
+        if (currentImages[index].isNew) URL.revokeObjectURL(currentImages[index].url);
         currentImages.splice(index, 1);
         if (previewIndex >= currentImages.length) previewIndex = Math.max(0, currentImages.length - 1);
         renderImageManager();
@@ -458,7 +497,7 @@
       const title = document.getElementById('proj-title').value || 'Título';
       const desc = document.getElementById('proj-desc').value || 'Descripción...';
       const status = document.getElementById('proj-status').value;
-      const level = parseInt(document.getElementById('proj-level').value) || 1;
+      const level = parseInt(document.getElementById('proj-level').value, 10) || 1;
       const fit = document.getElementById('proj-fit').value;
 
       document.getElementById('prev-title').textContent = title;
@@ -466,9 +505,15 @@
 
       const badge = document.getElementById('prev-badge');
       badge.className = 'badge';
-      const statusMap = { active: 'is-active', building: 'is-building', planned: 'is-planned', inactive: 'is-inactive' };
-      badge.classList.add(statusMap[status]);
-      document.getElementById('prev-badge-text').textContent = status;
+      const statusMap = {
+        active: { cls: 'is-active', label: 'activo' },
+        building: { cls: 'is-building', label: 'en proceso' },
+        planned: { cls: 'is-planned', label: 'planeado' },
+        inactive: { cls: 'is-inactive', label: 'inactivo' }
+      };
+      const st = statusMap[status] || statusMap.inactive;
+      badge.classList.add(st.cls);
+      document.getElementById('prev-badge-text').textContent = st.label;
 
       document.querySelectorAll('#prev-level-box .lvl-dot').forEach((dot, i) => {
         dot.classList.toggle('is-on', i < level);
@@ -521,7 +566,7 @@
       const id = document.getElementById('proj-id').value;
       const title = document.getElementById('proj-title').value;
       const desc = document.getElementById('proj-desc').value;
-      
+
       if (!title || !desc) return showStatus('Título y descripción son obligatorios.', 'err');
       if (currentImages.length === 0) return showStatus('Sube al menos una imagen.', 'err');
 
@@ -530,36 +575,36 @@
       saveBtn.textContent = 'Guardando...';
 
       try {
-        let finalImageUrls = [];
+        const finalImageUrls = [];
         for (let i = 0; i < currentImages.length; i++) {
           const imgData = currentImages[i];
           if (imgData.isNew && imgData.file) {
-            saveBtn.textContent = `Subiendo img (${i+1}/${currentImages.length})...`;
+            saveBtn.textContent = `Subiendo img (${i + 1}/${currentImages.length})...`;
             finalImageUrls.push(await uploadImageToGitHub(imgData.file));
           } else {
             finalImageUrls.push(imgData.url);
           }
         }
 
-        const project = { 
-          id: id ? projectsData[id].id : Date.now().toString(), 
-          title, desc, 
-          link: document.getElementById('proj-link').value, 
+        const project = {
+          id: id !== '' ? projectsData[id].id : Date.now().toString(),
+          title,
+          desc,
+          link: document.getElementById('proj-link').value,
           blog: document.getElementById('proj-blog').value,
-          images: finalImageUrls, 
-          imageFit: document.getElementById('proj-fit').value, 
-          status: document.getElementById('proj-status').value, 
-          level: parseInt(document.getElementById('proj-level').value),
-          skills: document.getElementById('proj-skills').value.split(',').map(s => s.trim()).filter(s => s !== "")
+          images: finalImageUrls,
+          imageFit: document.getElementById('proj-fit').value,
+          status: document.getElementById('proj-status').value,
+          level: parseInt(document.getElementById('proj-level').value, 10),
+          skills: document.getElementById('proj-skills').value.split(',').map(s => s.trim()).filter(s => s !== '')
         };
-        
-        if (id) projectsData[id] = project; else projectsData.push(project);
+
+        if (id !== '') projectsData[id] = project; else projectsData.push(project);
 
         await saveToGitHub();
         showStatus('¡Guardado con éxito!', 'ok');
         generateSkillsDatalist();
         renderList();
-        
       } catch (err) {
         showStatus(err.message, 'err');
       } finally {
@@ -569,11 +614,18 @@
     }
 
     async function deleteProject(index) {
-      if (!confirm('¿Seguro que quieres borrar este proyecto?')) return;
+      const snapshot = [...projectsData];
       projectsData.splice(index, 1);
-      await saveToGitHub();
-      renderList();
-      resetForm();
+      try {
+        await saveToGitHub();
+        renderList();
+        resetForm();
+        showStatus('Proyecto eliminado.', 'ok');
+      } catch (err) {
+        projectsData = snapshot;
+        renderList();
+        showStatus(err.message || 'Error al eliminar proyecto.', 'err');
+      }
     }
 
     async function saveToGitHub() {
@@ -581,7 +633,7 @@
       const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(projectsData, null, 2))));
       const res = await fetch(API_URL(), {
         method: 'PUT',
-        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: 'Actualizar proyectos', content: contentBase64, sha: fileSha })
       });
       if (!res.ok) throw new Error('Error al guardar en GitHub.');
@@ -599,17 +651,19 @@
     }
 
     async function uploadImageToGitHub(file) {
-      const token = localStorage.getItem('gh_token'), user = localStorage.getItem('gh_user'), repo = localStorage.getItem('gh_repo');
+      const token = localStorage.getItem('gh_token');
+      const user = localStorage.getItem('gh_user');
+      const repo = localStorage.getItem('gh_repo');
       const filename = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-      const path = `assets/img/projects/${filename}`;
+      const filePath = `assets/img/projects/${filename}`;
       const base64Data = await fileToBase64(file);
-      const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${path}`, {
+      const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${filePath}`, {
         method: 'PUT',
-        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: `Subir img: ${filename}`, content: base64Data.split(',')[1] })
       });
       if (!res.ok) throw new Error('Error al subir imagen.');
-      return path;
+      return filePath;
     }
 
     function showStatus(msg, type) {
@@ -619,11 +673,11 @@
     }
 
     function exportJSON() {
-      if (projectsData.length === 0) return alert("No hay datos.");
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectsData, null, 2));
+      if (projectsData.length === 0) return showStatus('No hay datos para exportar.', 'err');
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(projectsData, null, 2));
       const a = document.createElement('a');
-      a.setAttribute("href", dataStr);
-      a.setAttribute("download", `backup_proyectos.json`);
+      a.setAttribute('href', dataStr);
+      a.setAttribute('download', 'backup_proyectos.json');
       a.click();
     }
 
@@ -635,23 +689,21 @@
         try {
           const importedData = JSON.parse(e.target.result);
           if (Array.isArray(importedData)) {
-            if(confirm("⚠️ Esto reemplazará TODOS tus proyectos actuales en GitHub. ¿Estás seguro?")) {
-              projectsData = importedData;
-              await saveToGitHub();
-              generateSkillsDatalist();
-              renderList();
-              if(projectsData.length > 0) editProject(0); else resetForm();
-              showStatus("Copia importada y guardada con éxito.", "ok");
-            }
+            projectsData = importedData;
+            await saveToGitHub();
+            generateSkillsDatalist();
+            renderList();
+            if (projectsData.length > 0) editProject(0); else resetForm();
+            showStatus('Copia importada y guardada con éxito.', 'ok');
           } else {
-            alert("El archivo no tiene el formato correcto (debe ser una lista de proyectos).");
+            showStatus('El archivo no tiene el formato correcto (debe ser una lista de proyectos).', 'err');
           }
-        } catch (err) {
-          alert("Error al leer el archivo JSON.");
+        } catch {
+          showStatus('Error al leer o guardar el archivo JSON.', 'err');
         }
       };
       reader.readAsText(file);
-      event.target.value = ''; 
+      event.target.value = '';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -665,6 +717,5 @@
       }
     });
   </script>
-  <script src="ui.js"></script>
 </body>
 </html>

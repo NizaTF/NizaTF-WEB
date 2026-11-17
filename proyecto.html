@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <title>Proyecto · Nico Talens</title>
-  
-  <!-- Librería para renderizar Markdown -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     (function() {
       const savedTheme = localStorage.getItem('theme');
@@ -20,11 +19,11 @@
       }
     })();
   </script>
-  
+
   <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
 </head>
-<body>
 
+<body>
   <div id="scroll-progress"></div>
 
   <nav class="navbar">
@@ -35,18 +34,17 @@
       <a href="habilidades.html">Habilidades</a>
       <a href="contacto.html">Contacto</a>
     </div>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">☀️</button>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema"></button>
   </nav>
 
   <main id="blog-container">
     <p style="text-align: center; padding: 100px; color: var(--text-muted); font-family: var(--font-mono);">Cargando proyecto...</p>
   </main>
 
-    <footer class="footer">
+  <footer class="footer">
     <div class="footer-content">
-      <p>© 2026 · Nico Talens · Hecho con HTML &amp; CSS</p>
-      
-      <!-- WIDGET DE ESTADO DEL SISTEMA -->
+      <p>© 2026 · Nico Talens · <a href="admin.html" style="color: inherit; text-decoration: none; cursor: default;">Hecho con HTML &amp; CSS</a></p>
+
       <div class="sys-status">
         <span class="sys-item">
           <span class="sys-dot"></span>
@@ -59,15 +57,23 @@
       </div>
     </div>
   </footer>
-  
+
   <button id="back-to-top" aria-label="Volver arriba">↑</button>
+
   <script src="ui.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('blog-container');
-      
-      // 1. Obtener el ID de la URL
+      const escapeHtml = (str) => window.PortfolioCounters ? window.PortfolioCounters.escapeHtml(str) : String(str);
+
+      const statusMap = {
+        active: { class: 'is-active', text: 'activo' },
+        building: { class: 'is-building', text: 'en proceso' },
+        planned: { class: 'is-planned', text: 'planeado' },
+        inactive: { class: 'is-inactive', text: 'inactivo' }
+      };
+
       const urlParams = new URLSearchParams(window.location.search);
       const projectId = urlParams.get('id');
 
@@ -76,39 +82,51 @@
         return;
       }
 
-      // 2. Buscar el proyecto en el JSON
-      fetch(`projects.json?v=${new Date().getTime()}`)
-        .then(res => res.json())
-        .then(projects => {
+      fetch(`projects.json?v=${Date.now()}`)
+        .then(res => {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(async projects => {
           const p = projects.find(proj => proj.id === projectId);
-          
+
           if (!p) {
-            container.innerHTML = `<div class="section"><h2 style="text-align:center;">Proyecto no encontrado</h2></div>`;
+            container.innerHTML = `<div class="section"><h2 style="text-align:center;">Proyecto no encontrado</h2><p style="text-align:center; margin-top:20px;"><a href="proyectos.html" class="btn btn-primary">Volver a proyectos</a></p></div>`;
             return;
           }
 
-          // 3. Generar las imágenes del carrusel
-          let projectImages = p.images || (p.image ? [p.image] : []);
-          const fitMode = p.imageFit || 'cover';
+          document.title = `${p.title} · Nico Talens`;
+
+          const projectImages = p.images || (p.image ? [p.image] : []);
+          const fitMode = p.imageFit === 'contain' ? 'contain' : 'cover';
           let imagesHTML = '';
-          
+
           if (projectImages.length > 0) {
             projectImages.forEach((imgUrl, i) => {
-              imagesHTML += `<img src="${imgUrl}" alt="${p.title}" style="object-fit: ${fitMode};" class="${i === 0 ? 'active' : ''}">`;
+              imagesHTML += `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title)}" style="object-fit: ${fitMode};" class="${i === 0 ? 'active' : ''}" onerror="this.src='/assets/img/placeholder.webp'">`;
             });
           }
 
-          // 4. Renderizar el contenido principal
           let markdownHTML = '';
           if (p.blog) {
-            // Convertimos el Markdown a HTML
-            markdownHTML = marked.parse(p.blog);
+            markdownHTML = window.marked ? marked.parse(p.blog) : `<p>${escapeHtml(p.blog)}</p>`;
           }
 
-          // Botón condicional (solo si existe el link)
+          const st = statusMap[p.status] || statusMap.inactive;
+          const level = Number(p.level) || 1;
+          let dotsLvl = '';
+          for (let i = 1; i <= 5; i++) {
+            dotsLvl += `<span class="lvl-dot ${i <= level ? 'is-on' : ''}"></span>`;
+          }
+
+          const hasLiked = localStorage.getItem(`liked_${p.id}`) === 'true';
+          const skillsHTML = Array.isArray(p.skills) && p.skills.length > 0
+            ? `<div class="blog-skills-row">${p.skills.map(s => `<a href="proyectos.html?skill=${encodeURIComponent(s)}" class="blog-skill-chip">${escapeHtml(s)}</a>`).join('')}</div>`
+            : '';
+
           const externalBtnHTML = p.link ? `
             <div style="margin-top: 40px; text-align: center;">
-              <a href="${p.link}" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 16px; padding: 16px 32px;">
+              <a href="${escapeHtml(p.link)}" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 16px; padding: 16px 32px;">
                 Visitar el proyecto en vivo ↗
               </a>
             </div>
@@ -117,8 +135,18 @@
           container.innerHTML = `
             <section class="section blog-header">
               <a href="proyectos.html" class="back-link">← Volver a proyectos</a>
-              <h1 class="page-title">${p.title}</h1>
-              <p class="page-subtitle">${p.desc}</p>
+              <h1 class="page-title">${escapeHtml(p.title)}</h1>
+              <p class="page-subtitle">${escapeHtml(p.desc)}</p>
+
+              <div class="blog-meta-bar">
+                <span class="badge ${st.class}"><span class="badge-dot"></span>${st.text}</span>
+                <div class="badge-level" title="Nivel: ${level}/5"><span class="badge-label">nivel</span>${dotsLvl}</div>
+                <button type="button" class="blog-like-btn ${hasLiked ? 'is-liked' : ''}" id="detail-like-btn">
+                  <span id="detail-like-icon">${hasLiked ? '❤️' : '🤍'}</span>
+                  <span id="detail-like-count">...</span> likes
+                </button>
+              </div>
+              ${skillsHTML}
             </section>
 
             ${projectImages.length > 0 ? `
@@ -126,8 +154,8 @@
                 <div class="blog-hero-carousel" id="blog-carousel">
                   ${imagesHTML}
                   ${projectImages.length > 1 ? `
-                    <button class="blog-nav prev" onclick="changeImg(-1)">❮</button>
-                    <button class="blog-nav next" onclick="changeImg(1)">❯</button>
+                    <button type="button" class="blog-nav prev" aria-label="Imagen anterior" onclick="changeImg(-1)">❮</button>
+                    <button type="button" class="blog-nav next" aria-label="Siguiente imagen" onclick="changeImg(1)">❯</button>
                   ` : ''}
                 </div>
               </section>
@@ -137,27 +165,60 @@
               <div class="blog-markdown">
                 ${markdownHTML || '<p><em>No hay contenido detallado para este proyecto todavía.</em></p>'}
               </div>
-              
               ${externalBtnHTML}
             </section>
           `;
 
-          // Lógica para el carrusel en la página del blog
+          // Cargar y sincronizar Likes del proyecto
+          const likeBtn = document.getElementById('detail-like-btn');
+          const likeCountEl = document.getElementById('detail-like-count');
+          const likeIconEl = document.getElementById('detail-like-icon');
+
+          try {
+            const count = await window.PortfolioCounters.getProjectLikes(p.id);
+            if (likeCountEl) likeCountEl.textContent = String(count ?? 0);
+          } catch {
+            if (likeCountEl) likeCountEl.textContent = '0';
+          }
+
+          if (likeBtn) {
+            let pending = false;
+            likeBtn.addEventListener('click', async () => {
+              if (pending) return;
+              pending = true;
+              likeBtn.disabled = true;
+              const currentlyLiked = localStorage.getItem(`liked_${p.id}`) === 'true';
+              const nextLiked = !currentlyLiked;
+              try {
+                const updated = await window.PortfolioCounters.setProjectLike(p.id, nextLiked);
+                if (likeCountEl) likeCountEl.textContent = String(updated);
+                if (likeIconEl) likeIconEl.textContent = nextLiked ? '❤️' : '🤍';
+                likeBtn.classList.toggle('is-liked', nextLiked);
+                localStorage.setItem(`liked_${p.id}`, String(nextLiked));
+              } catch {
+                // Mantener estado previo
+              } finally {
+                likeBtn.disabled = false;
+                pending = false;
+              }
+            });
+          }
+
+          // Carrusel en vista detalle
           let currentImg = 0;
           const imgs = document.querySelectorAll('#blog-carousel img');
-          
           window.changeImg = (dir) => {
             if (imgs.length <= 1) return;
             imgs[currentImg].classList.remove('active');
             currentImg = (currentImg + dir + imgs.length) % imgs.length;
             imgs[currentImg].classList.add('active');
           };
-
         })
-        .catch(err => {
+        .catch(() => {
           container.innerHTML = `<p style="color: var(--accent); text-align:center; padding:100px;">Error al cargar el proyecto.</p>`;
         });
     });
   </script>
 </body>
+
 </html>

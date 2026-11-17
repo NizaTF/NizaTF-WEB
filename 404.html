@@ -6,9 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/style.css">
   <title>Error 404 · Nico Talens</title>
-  
+
   <script>
-    // Evitar el parpadeo (FOUC) al cargar la página
     (function() {
       const savedTheme = localStorage.getItem('theme');
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -19,18 +18,11 @@
       }
     })();
   </script>
-  
-  <!-- Favicon Dinámico -->
+
   <link rel="icon" type="image/png" href="/assets/img/favicon_oscuro.png" id="dynamic-favicon">
-  
-  <!-- SEO: Evitar que Google indexe la página de error -->
   <meta name="robots" content="noindex">
 
   <style>
-    /* ============================
-       FONDO DE INTERROGANTES ANIMADOS
-       ============================ */
-    
     body::before {
       display: none;
     }
@@ -44,9 +36,7 @@
       height: 100vh;
       z-index: -1;
       pointer-events: none;
-      
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23ff4d5e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'/%3E%3C/svg%3E");
-      
       background-size: 100px 100px;
       background-position: 0 0;
       animation: dotsDrift 5s linear infinite;
@@ -59,12 +49,9 @@
     }
 
     [data-theme="light"] body::after {
-      opacity: 0.15; 
+      opacity: 0.15;
     }
 
-    /* ============================
-       FORZAR FOOTER AL FONDO
-       ============================ */
     body {
       display: flex;
       flex-direction: column;
@@ -82,39 +69,35 @@
 
   <nav class="navbar">
     <div class="nav-links">
-      <a href="index.html">Inicio</a>
-      <a href="sobre-mi.html">Sobre mí</a>
-      <a href="proyectos.html">Proyectos</a>
-      <a href="habilidades.html">Habilidades</a>
-      <a href="contacto.html">Contacto</a>
+      <a href="/index.html">Inicio</a>
+      <a href="/sobre-mi.html">Sobre mí</a>
+      <a href="/proyectos.html">Proyectos</a>
+      <a href="/habilidades.html">Habilidades</a>
+      <a href="/contacto.html">Contacto</a>
     </div>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">☀️</button>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema"></button>
   </nav>
 
   <main>
-    <!-- CONTENIDO 404 -->
     <section class="page-header" style="padding-top: 120px; padding-bottom: 80px;">
-      
       <span class="eyebrow" id="error-eyebrow">Error 404</span>
       <h1 class="page-title" id="error-title">Cargando...</h1>
       <p class="page-subtitle" id="error-desc" style="margin-bottom: 40px;"></p>
 
-      <!-- Simulación de terminal -->
       <div class="card" style="max-width: 520px; margin: 0 auto; text-align: left; padding: 24px; background: var(--surface);">
         <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-soft); line-height: 1.8;" id="terminal-output"></div>
       </div>
 
       <div style="margin-top: 40px;">
-        <a href="index.html" class="btn btn-primary">Volver al inicio</a>
+        <a href="/index.html" class="btn btn-primary">Volver al inicio</a>
       </div>
     </section>
   </main>
 
-    <footer class="footer">
+  <footer class="footer">
     <div class="footer-content">
       <p>© 2026 · Nico Talens · Hecho con HTML &amp; CSS</p>
-      
-      <!-- WIDGET DE ESTADO DEL SISTEMA -->
+
       <div class="sys-status">
         <span class="sys-item">
           <span class="sys-dot"></span>
@@ -130,11 +113,10 @@
 
   <button id="back-to-top" aria-label="Volver arriba">↑</button>
 
-  <script src="ui.js"></script>
+  <script src="/ui.js"></script>
 
-  <!-- SCRIPT DE MENSAJES ALEATORIOS -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const mensajes = [
         {
           eyebrow: "Error 404 // Búsqueda fallida",
@@ -216,11 +198,12 @@
       const randomIndex = Math.floor(Math.random() * mensajes.length);
       const msg = mensajes[randomIndex];
 
-      document.getElementById("error-eyebrow").textContent = msg.eyebrow;
-      document.getElementById("error-title").innerHTML = msg.title.replace(".", '<span class="accent">.</span>');
-      document.getElementById("error-desc").textContent = msg.desc;
-      document.getElementById("terminal-output").innerHTML = msg.terminal;
+      document.getElementById('error-eyebrow').textContent = msg.eyebrow;
+      document.getElementById('error-title').innerHTML = msg.title.replace('.', '<span class="accent">.</span>');
+      document.getElementById('error-desc').textContent = msg.desc;
+      document.getElementById('terminal-output').innerHTML = msg.terminal;
     });
   </script>
 </body>
+
 </html>

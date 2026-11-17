@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Sobre mí · Nico Talens</title>
-    
+
     <script>
-        // Evitar el parpadeo (FOUC) al cargar la página
         (function() {
             const savedTheme = localStorage.getItem('theme');
             const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -19,16 +18,13 @@
             }
         })();
     </script>
-    
-    <!-- Favicon Dinámico -->
+
     <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
 
-    <!-- SEO Básico -->
     <meta name="description"
         content="Portfolio de Nico Talens, estudiante de Sistemas Microinformáticos y Redes (SMX). Especializado en hardware, redes y desarrollo web.">
     <meta name="author" content="Nico Talens">
 
-    <!-- Open Graph (Para LinkedIn, WhatsApp, etc.) -->
     <meta property="og:title" content="Nico Talens · Portfolio">
     <meta property="og:description"
         content="Estudiante de SMX apasionado por la informática, las redes y el desarrollo web.">
@@ -47,7 +43,7 @@
             <a href="habilidades.html">Habilidades</a>
             <a href="contacto.html">Contacto</a>
         </div>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema">☀️</button>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema"></button>
     </nav>
 
     <!-- CABECERA -->
@@ -63,20 +59,15 @@
     <section class="section">
         <div class="about-grid">
 
-            <!-- Columna izquierda: foto + datos -->
+            <!-- Foto + datos -->
             <aside class="about-side">
-                
-                <!-- AVATAR INTERACTIVO (FLIP) -->
                 <div class="avatar avatar-flip" title="Pasa el ratón para ver mi logo">
-                    <!-- Cara frontal: Tu foto -->
                     <div class="avatar-front">
                         <img src="assets/img/foto-perfil.png" alt="Nico Talens" class="avatar-img">
                     </div>
-                    <!-- Cara trasera: Tu logo dinámico -->
                     <div class="avatar-back">
                         <img src="assets/img/logo_oscuro.png" alt="Logo Nico Talens" class="logo-img" id="logo-dinamico">
                     </div>
-                    <!-- Pista visual sutil -->
                     <div class="flip-hint">🔄</div>
                 </div>
 
@@ -88,7 +79,7 @@
                 </ul>
             </aside>
 
-            <!-- Columna derecha: texto -->
+            <!-- Texto -->
             <div class="about-main">
                 <h2 class="about-heading">Hola, soy <span class="accent">Nico Talens</span></h2>
 
@@ -114,11 +105,8 @@
 
                 <!-- MARQUESINA DE TAGS (2 LÍNEAS) -->
                 <div class="tags-marquee-container">
-
-                    <!-- Línea 1: Se mueve de Izquierda a Derecha -->
                     <div class="tags-marquee-row">
                         <div class="tags-marquee-track track-ltr">
-                            <!-- Bloque 1 -->
                             <span class="tag" data-icon="🔧">hardware</span>
                             <span class="tag" data-icon="🪟">windows</span>
                             <span class="tag" data-icon="🐧">linux</span>
@@ -131,7 +119,6 @@
                             <span class="tag" data-icon="🔒">firewalls</span>
                             <span class="tag" data-icon="📂">copias de seguridad</span>
 
-                            <!-- Bloque 2 (Copia exacta para el bucle infinito) -->
                             <span class="tag" data-icon="🔧">hardware</span>
                             <span class="tag" data-icon="🪟">windows</span>
                             <span class="tag" data-icon="🐧">linux</span>
@@ -146,10 +133,8 @@
                         </div>
                     </div>
 
-                    <!-- Línea 2: Se mueve de Derecha a Izquierda -->
                     <div class="tags-marquee-row">
                         <div class="tags-marquee-track track-rtl">
-                            <!-- Bloque 1 -->
                             <span class="tag" data-icon="🌐">html</span>
                             <span class="tag" data-icon="🎨">css</span>
                             <span class="tag" data-icon="⚡">javascript</span>
@@ -162,7 +147,6 @@
                             <span class="tag" data-icon="📋">gestión de incidencias</span>
                             <span class="tag" data-icon="🇬🇧">inglés técnico</span>
 
-                            <!-- Bloque 2 (Copia exacta para el bucle infinito) -->
                             <span class="tag" data-icon="🌐">html</span>
                             <span class="tag" data-icon="🎨">css</span>
                             <span class="tag" data-icon="⚡">javascript</span>
@@ -176,7 +160,6 @@
                             <span class="tag" data-icon="🇬🇧">inglés técnico</span>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="about-actions">
@@ -241,22 +224,21 @@
     </section>
 
     <footer class="footer">
-    <div class="footer-content">
-      <p>© 2026 · Nico Talens · Hecho con HTML &amp; CSS</p>
-      
-      <!-- WIDGET DE ESTADO DEL SISTEMA -->
-      <div class="sys-status">
-        <span class="sys-item">
-          <span class="sys-dot"></span>
-          SYS.STATUS: <span style="color: var(--green);">ONLINE</span>
-        </span>
-        <span class="sys-divider">|</span>
-        <span class="sys-item">UPTIME: 99.9%</span>
-        <span class="sys-divider">|</span>
-        <span class="sys-item" id="sys-last-deploy">LAST DEPLOY: Cargando...</span>
-      </div>
-    </div>
-  </footer>
+        <div class="footer-content">
+            <p>© 2026 · Nico Talens · Hecho con HTML &amp; CSS</p>
+
+            <div class="sys-status">
+                <span class="sys-item">
+                    <span class="sys-dot"></span>
+                    SYS.STATUS: <span style="color: var(--green);">ONLINE</span>
+                </span>
+                <span class="sys-divider">|</span>
+                <span class="sys-item">UPTIME: 99.9%</span>
+                <span class="sys-divider">|</span>
+                <span class="sys-item" id="sys-last-deploy">LAST DEPLOY: Cargando...</span>
+            </div>
+        </div>
+    </footer>
 
     <button id="back-to-top" aria-label="Volver arriba">↑</button>
 

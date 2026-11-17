@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,10 +9,10 @@ interface StatsData {
 
 const app = express();
 const PORT = 3000;
-const PUBLIC_DIR = path.join(process.cwd(), 'public');
-const DATA_DIR = path.join(process.cwd(), 'data');
+const ROOT_DIR = process.cwd();
+const DATA_DIR = path.join(ROOT_DIR, 'data');
 const STATS_FILE = path.join(DATA_DIR, 'stats.json');
-const PROJECTS_FILE = path.join(PUBLIC_DIR, 'projects.json');
+const PROJECTS_FILE = path.join(ROOT_DIR, 'projects.json');
 
 app.use(express.json());
 
@@ -150,14 +150,29 @@ const handleLikeDown = async (req: Request, res: Response) => {
 app.post('/api/counters/likes/:id/down', handleLikeDown);
 app.get('/api/counters/likes/:id/down', handleLikeDown);
 
-app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
+const BLOCKED_PATH_RE = /^\/(server\.ts|package\.json|package-lock\.json|tsconfig\.json|vite\.config\.ts|metadata\.json|\.env($|\.|\/)|\.git|data(\/|$)|src(\/|$)|node_modules(\/|$)|dist(\/|$))/i;
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (BLOCKED_PATH_RE.test(req.path)) {
+    const notFoundPage = path.join(ROOT_DIR, '404.html');
+    if (fs.existsSync(notFoundPage)) {
+      res.status(404).sendFile(notFoundPage);
+    } else {
+      res.status(404).send('404 Not Found');
+    }
+    return;
+  }
+  next();
+});
+
+app.use(express.static(ROOT_DIR, { extensions: ['html'] }));
 
 app.use((req: Request, res: Response) => {
   if (req.path.startsWith('/api/')) {
     res.status(404).json({ error: 'API route not found' });
     return;
   }
-  const notFoundPage = path.join(PUBLIC_DIR, '404.html');
+  const notFoundPage = path.join(ROOT_DIR, '404.html');
   if (fs.existsSync(notFoundPage)) {
     res.status(404).sendFile(notFoundPage);
   } else {

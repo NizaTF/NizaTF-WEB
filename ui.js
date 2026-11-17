@@ -1,35 +1,27 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const html = document.documentElement;
-  const themeToggle = document.getElementById('theme-toggle');
+(function () {
+  // --- UTILIDAD: Escapar HTML para evitar XSS real ---
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
-  // --- 1. DETECTAR TEMA ---
-  const savedTheme = localStorage.getItem('theme');
-  const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  const currentTheme = savedTheme || (systemPrefersLight ? 'light' : 'dark');
+  // --- TRAMPA 1: Simulación de Inyección SQL Exitosa ---
+  (function detectSQLi() {
+    const url = decodeURIComponent(window.location.href).toLowerCase();
+    if (url.includes('or 1=1') || url.includes('union select') || url.includes('drop table')) {
+      if (window.location.href.includes('secret.html') || window.location.href.includes('admin.html')) return;
 
-  // --- 2. FAVICON Y LOGO DINÁMICOS ---
-  const dynamicFavicon = document.getElementById('dynamic-favicon');
-  const logoDinamico = document.getElementById('logo-dinamico');
-
-  // --- TRAMPA: Simulación de Inyección SQL Exitosa ---
-(function() {
-  const url = decodeURIComponent(window.location.href).toLowerCase();
-  
-  // Buscamos firmas típicas de ataques SQL
-  if (url.includes("or 1=1") || url.includes("union select") || url.includes("drop table")) {
-    
-    // Evitamos que se active en la página secreta o en el admin real
-    if (window.location.href.includes("secret.html") || window.location.href.includes("admin.html")) return;
-
-    // Sobrescribimos la página entera con un diseño 100% realista de error/volcado
-    document.documentElement.innerHTML = `
-      <head><title>Database Error</title></head>
-      <body style="background:#f8f9fa; color:#333; font-family:monospace; padding:40px;">
-        <h2 style="color:#d9534f; font-family:Arial, sans-serif;">SQLSTATE[42000]: Syntax error or access violation</h2>
-        <p>Unauthorized query detected. Initiating database dump to prevent data loss...</p>
-        
-        <div style="background:#fff; border:1px solid #ddd; padding:20px; margin-top:20px; overflow-x:auto;">
-          <pre>
+      document.documentElement.innerHTML = `
+        <head><title>Database Error</title></head>
+        <body style="background:#f8f9fa; color:#333; font-family:monospace; padding:40px;">
+          <h2 style="color:#d9534f; font-family:Arial, sans-serif;">SQLSTATE[42000]: Syntax error or access violation</h2>
+          <p>Unauthorized query detected. Initiating database dump to prevent data loss...</p>
+          <div style="background:#fff; border:1px solid #ddd; padding:20px; margin-top:20px; overflow-x:auto;">
+            <pre>
 Table: users
 +----+----------+------------------------------------------+---------------------+
 | id | username | password                                 | email               |
@@ -39,205 +31,55 @@ Table: users
 | 3  | root     | $2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgd | root@localhost      |
 +----+----------+------------------------------------------+---------------------+
 3 rows in set (0.001 sec)
-          </pre>
-        </div>
-        <p style="margin-top:20px; color:#666;">Fatal error: Uncaught PDOException: SQLSTATE[42000] in /var/www/html/index.php:42</p>
-      </body>
-    `;
-
-    // Falsa esperanza: Dejamos que lean la tabla durante 3 segundos
-    setTimeout(() => {
-      window.location.replace("secret.html");
-    }, 3500);
-  }
-})();
-
-  function updateAssets(theme) {
-    // Actualizar Favicon
-    if (dynamicFavicon) {
-      const newIcon = theme === 'dark' ? 'assets/img/favicon_oscuro.png' : 'assets/img/favicon_claro.png';
-      if (!dynamicFavicon.href.includes(newIcon)) {
-        dynamicFavicon.href = `${newIcon}?v=${new Date().getTime()}`; // Cache buster
-      }
-    }
-
-    // Actualizar Logo del Avatar
-    if (logoDinamico) {
-      if (theme === 'dark') {
-        logoDinamico.src = 'assets/img/logo_oscuro.png';
-      } else {
-        logoDinamico.src = 'assets/img/logo_claro.png';
-      }
-    }
-  }
-
-  // --- 3. APLICAR TEMA AL CARGAR ---
-  html.setAttribute('data-theme', currentTheme);
-  updateIcon(currentTheme);
-
-  // --- 4. ESCUCHAR EL CLIC DEL BOTÓN ---
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      updateIcon(newTheme);
-    });
-  }
-
-  // --- 5. ACTUALIZAR ICONO (AHORA CON TUS IMÁGENES) ---
-  function updateIcon(theme) {
-    if (themeToggle) {
-      // Definimos la ruta de la imagen dependiendo del tema
-      // (Si el tema es oscuro, mostramos el sol para pasar a claro. Y viceversa).
-      const iconSrc = theme === 'dark' ? 'assets/img/boton_oscuro.png' : 'assets/img/boton_claro.png';
-      
-      // Comprobamos si la etiqueta <img> ya existe dentro del botón
-      let iconImg = document.getElementById('theme-icon-img');
-      
-      if (!iconImg) {
-        // Si no existe, la creamos (reemplazando el emoji que hubiera)
-        themeToggle.innerHTML = `<img id="theme-icon-img" src="${iconSrc}" alt="Cambiar tema" class="theme-icon-img">`;
-      } else {
-        // Si ya existe, solo actualizamos la ruta (mucho más eficiente)
-        iconImg.src = iconSrc;
-      }
-    }
-    
-    // Llamamos a la función que actualiza favicon y logo con un pequeño delay para evitar lag
-    setTimeout(() => {
-      updateAssets(theme);
-    }, 150);
-  }
-
-  // --- 6. INDICADOR DE SCROLL Y BOTÓN VOLVER ARRIBA ---
-  const progressBar = document.getElementById('scroll-progress');
-  const backToTopBtn = document.getElementById('back-to-top');
-
-  window.addEventListener('scroll', () => {
-    if (progressBar) {
-      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
-      progressBar.style.width = scrolled + '%';
-    }
-
-    if (backToTopBtn) {
-      if (window.scrollY > 400) {
-        backToTopBtn.classList.add('is-visible');
-      } else {
-        backToTopBtn.classList.remove('is-visible');
-      }
-    }
-  });
-
-  if (backToTopBtn) {
-    backToTopBtn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-    // --- 7. TRANSICIÓN SUAVE ENTRE PESTAÑAS (Fade Out) ---
-  const navLinks = document.querySelectorAll('.nav-links a, .card, .btn'); // Añadimos botones y tarjetas
-  
-  navLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      const href = this.getAttribute('href');
-      
-      // Ignorar si es la página actual, si es un enlace externo o si abre en otra pestaña
-      if (this.classList.contains('active') || !href || href.startsWith('http') || href.startsWith('#') || this.target === '_blank') {
-        return;
-      }
-
-      e.preventDefault();
-      
-      // Creamos la capa de fundido
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.inset = '0';
-      overlay.style.backgroundColor = 'var(--bg)'; // Color de fondo de tu web
-      overlay.style.zIndex = '99999';
-      overlay.style.opacity = '0';
-      overlay.style.transition = 'opacity 0.3s ease';
-      overlay.style.pointerEvents = 'none';
-      document.body.appendChild(overlay);
-
-      // Hacemos que la capa aparezca suavemente
-      requestAnimationFrame(() => {
-        overlay.style.opacity = '1';
-      });
-
-      // Esperamos 300ms (lo que dura el fundido) y cambiamos de página
+            </pre>
+          </div>
+          <p style="margin-top:20px; color:#666;">Fatal error: Uncaught PDOException: SQLSTATE[42000] in /var/www/html/index.php:42</p>
+        </body>
+      `;
       setTimeout(() => {
-        window.location.href = href;
-      }, 300);
-    });
-  });
-    // --- 11. STATUS DEL SISTEMA (Footer) ---
-  const sysLastDeploy = document.getElementById('sys-last-deploy');
-  
-  if (sysLastDeploy) {
-    // Obtenemos la fecha y hora actual
-    const now = new Date();
-    
-    // Formateamos la fecha (Año-Mes-Día Hora:Minutos)
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
-    
-    // Lo inyectamos en el HTML
-    sysLastDeploy.textContent = `LAST DEPLOY: ${formattedDate}`;
-  }
-});
+        window.location.replace('/secret.html');
+      }, 3500);
+    }
+  })();
 
-// --- TRAMPA: Falso XSS Exitoso ---
-(function detectXSS() {
-  const url = decodeURIComponent(window.location.href).toLowerCase();
-  
-  // Detectamos etiquetas de script o alertas en la URL
-  if (url.includes("<script>") || url.includes("alert(") || url.includes("onerror=")) {
-    
-    if (window.location.href.includes("secret.html")) return;
+  // --- TRAMPA 2: Falso XSS Exitoso (con salida escapada de forma segura) ---
+  (function detectXSS() {
+    const url = decodeURIComponent(window.location.href).toLowerCase();
+    if (url.includes('<script>') || url.includes('alert(') || url.includes('onerror=')) {
+      if (window.location.href.includes('secret.html') || window.location.href.includes('admin.html')) return;
 
-    document.documentElement.innerHTML = `
-      <head><title>XSS Vulnerability</title></head>
-      <body style="background:#0d1117; color:#c9d1d9; font-family:monospace; padding:40px;">
-        <h2 style="color:#ff7b72;">[!] Reflected XSS Detected</h2>
-        <p style="color:#8b949e;">The application reflects unsanitized user input. Executing payload...</p>
-        
-        <div style="background:#161b22; border:1px solid #30363d; padding:20px; margin-top:20px;">
-          <p>> Payload ejecutado: <span style="color:#79c0ff;">${window.location.href.split('?')[1]}</span></p>
-          <p>> Cookie de sesión obtenida: <span style="color:#3ddc97;">session_id=8f7d6a5s4d3f2g1h0j</span></p>
-          <p>> Elevando privilegios...</p>
-          <p>> Acceso concedido al panel de administrador.</p>
-        </div>
-      </body>
-    `;
+      const rawPayload = window.location.href.split('?')[1] || 'payload';
+      const safePayload = escapeHtml(decodeURIComponent(rawPayload));
 
-    // Falsa esperanza: 3.5 segundos para que se crea el rey del hacking
-    setTimeout(() => {
-      window.location.replace("secret.html");
-    }, 3500);
-  }
-})();
+      document.documentElement.innerHTML = `
+        <head><title>XSS Vulnerability</title></head>
+        <body style="background:#0d1117; color:#c9d1d9; font-family:monospace; padding:40px;">
+          <h2 style="color:#ff7b72;">[!] Reflected XSS Detected</h2>
+          <p style="color:#8b949e;">The application reflects unsanitized user input. Executing payload...</p>
+          <div style="background:#161b22; border:1px solid #30363d; padding:20px; margin-top:20px;">
+            <p>&gt; Payload ejecutado: <span style="color:#79c0ff;">${safePayload}</span></p>
+            <p>&gt; Cookie de sesión obtenida: <span style="color:#3ddc97;">session_id=8f7d6a5s4d3f2g1h0j</span></p>
+            <p>&gt; Elevando privilegios...</p>
+            <p>&gt; Acceso concedido al panel de administrador.</p>
+          </div>
+        </body>
+      `;
+      setTimeout(() => {
+        window.location.replace('/secret.html');
+      }, 3500);
+    }
+  })();
 
-// --- TRAMPA: Falsa vulnerabilidad LFI ---
-(function fakeLFI() {
-  const url = decodeURIComponent(window.location.href).toLowerCase();
-  
-  // Buscamos intentos de leer /etc/passwd o retroceder directorios (../)
-  if (url.includes("etc/passwd") || url.includes("file=") || url.includes("page=../")) {
-    
-    if (window.location.href.includes("secret.html")) return;
+  // --- TRAMPA 3: Falsa vulnerabilidad LFI ---
+  (function fakeLFI() {
+    const url = decodeURIComponent(window.location.href).toLowerCase();
+    if (url.includes('etc/passwd') || url.includes('file=') || url.includes('page=../')) {
+      if (window.location.href.includes('secret.html') || window.location.href.includes('admin.html')) return;
 
-    // Mostramos una falsa lectura del archivo del sistema
-    document.documentElement.innerHTML = `
-      <head><title>Reading file...</title></head>
-      <body style="background:#fff; color:#000; font-family:monospace; padding:20px; font-size:14px;">
-        <pre style="margin:0; line-height:1.5;">
+      document.documentElement.innerHTML = `
+        <head><title>Reading file...</title></head>
+        <body style="background:#fff; color:#000; font-family:monospace; padding:20px; font-size:14px;">
+          <pre style="margin:0; line-height:1.5;">
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 bin:x:2:2:bin:/bin:/usr/sbin/nologin
@@ -246,109 +88,345 @@ sync:x:4:65534:sync:/bin:/bin/sync
 www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
 mysql:x:105:110:MySQL Server,,,:/nonexistent:/bin/false
 nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
-        </pre>
-        <p style="color:#888; margin-top:20px;">[!] Warning: File read successful. Escalating privileges...</p>
-      </body>
-    `;
+          </pre>
+          <p style="color:#888; margin-top:20px;">[!] Warning: File read successful. Escalating privileges...</p>
+        </body>
+      `;
+      setTimeout(() => {
+        window.location.replace('/secret.html');
+      }, 3000);
+    }
+  })();
 
-    // Falsa esperanza: 3 segundos leyendo las contraseñas del sistema
-    setTimeout(() => {
-      window.location.replace("secret.html");
-    }, 3000);
+  // --- CLIENTE CENTRALIZADO DE VISITAS Y LIKES ---
+  // 1) Backend propio (/api/counters/*) cuando corre bajo Node/Express.
+  // 2) CounterAPI v2 si se configura window.COUNTERAPI_V2_WORKSPACE.
+  // 3) CountAPI público (countapi.mileshilliard.com) en GitHub Pages estático sin API key.
+  const VISIT_SESSION_KEY = 'portfolio_visit_counted';
+  const VISIT_CACHE_KEY = 'portfolio_visit_cached';
+  const PUBLIC_COUNTER_BASE = 'https://countapi.mileshilliard.com/api/v1';
+  const PUBLIC_KEY_PREFIX = 'nizatf-portfolio';
+  let visitPromise = null;
+  let hasLocalBackend = null;
+
+  function parseCounterValue(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+    if (payload.data && typeof payload.data.up_count === 'number') return payload.data.up_count;
+    if (typeof payload.up_count === 'number') return payload.up_count;
+    if (typeof payload.count === 'number') return payload.count;
+    if (typeof payload.value === 'number') return payload.value;
+    return null;
   }
-  document.addEventListener('DOMContentLoaded', () => {
-  const html = document.documentElement;
-  const themeToggle = document.getElementById('theme-toggle');
 
-  // --- 1. DETECTAR TEMA ---
-  const savedTheme = localStorage.getItem('theme');
-  const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  const currentTheme = savedTheme || (systemPrefersLight ? 'light' : 'dark');
-
-  // --- 2. FAVICON Y LOGO DINÁMICOS ---
-  const dynamicFavicon = document.getElementById('dynamic-favicon');
-  const logoDinamico = document.getElementById('logo-dinamico');
-
-  function updateAssets(theme) {
-    if (dynamicFavicon) {
-      const newIcon = theme === 'dark' ? 'assets/img/favicon_oscuro.png' : 'assets/img/favicon_claro.png';
-      if (!dynamicFavicon.href.includes(newIcon)) {
-        dynamicFavicon.href = `${newIcon}?v=${new Date().getTime()}`;
+  async function tryLocalJson(url, method = 'GET') {
+    if (hasLocalBackend === false) return null;
+    try {
+      const res = await fetch(url, { method, headers: { Accept: 'application/json' } });
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        hasLocalBackend = true;
+        return await res.json();
       }
-    }
-    if (logoDinamico) {
-      logoDinamico.src = theme === 'dark' ? 'assets/img/logo_oscuro.png' : 'assets/img/logo_claro.png';
-    }
-  }
-
-  // --- 3. APLICAR TEMA ---
-  html.setAttribute('data-theme', currentTheme);
-  updateIcon(currentTheme);
-
-  // --- 4. ESCUCHAR CLIC DEL BOTÓN ---
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      updateIcon(newTheme);
-    });
-  }
-
-  // --- 5. ACTUALIZAR ICONO ---
-  function updateIcon(theme) {
-    if (themeToggle) {
-      const iconSrc = theme === 'dark' ? 'assets/img/icon-sun.png' : 'assets/img/icon-moon.png';
-      let iconImg = document.getElementById('theme-icon-img');
-      if (!iconImg) {
-        themeToggle.innerHTML = `<img id="theme-icon-img" src="${iconSrc}" alt="Cambiar tema" class="theme-icon-img">`;
-      } else {
-        iconImg.src = iconSrc;
+      if (res.status === 404 || res.status === 405) {
+        hasLocalBackend = false;
       }
+    } catch {
+      hasLocalBackend = false;
     }
-    setTimeout(() => { updateAssets(theme); }, 150);
+    return null;
   }
 
-  // --- 6. SCROLL Y BOTÓN ARRIBA ---
-  const progressBar = document.getElementById('scroll-progress');
-  const backToTopBtn = document.getElementById('back-to-top');
+  async function remoteGet(counterName) {
+    const v2Workspace = window.COUNTERAPI_V2_WORKSPACE || '';
+    if (v2Workspace) {
+      const res = await fetch(`https://api.counterapi.dev/v2/${encodeURIComponent(v2Workspace)}/${counterName}`);
+      if (res.status === 404) return 0;
+      if (!res.ok) throw new Error('CounterAPI v2 error');
+      return parseCounterValue(await res.json()) ?? 0;
+    }
 
-  window.addEventListener('scroll', () => {
-    if (progressBar) {
-      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      progressBar.style.width = ((winScroll / height) * 100) + '%';
+    const key = `${PUBLIC_KEY_PREFIX}-${counterName}`;
+    const res = await fetch(`${PUBLIC_COUNTER_BASE}/get/${encodeURIComponent(key)}`);
+    if (res.status === 404) return 0;
+    if (!res.ok) throw new Error('Public counter error');
+    return parseCounterValue(await res.json()) ?? 0;
+  }
+
+  async function remoteUp(counterName) {
+    const v2Workspace = window.COUNTERAPI_V2_WORKSPACE || '';
+    if (v2Workspace) {
+      const res = await fetch(`https://api.counterapi.dev/v2/${encodeURIComponent(v2Workspace)}/${counterName}/up`);
+      if (!res.ok) throw new Error('CounterAPI v2 error');
+      return parseCounterValue(await res.json()) ?? 0;
     }
-    if (backToTopBtn) {
-      window.scrollY > 400 ? backToTopBtn.classList.add('is-visible') : backToTopBtn.classList.remove('is-visible');
+
+    const key = `${PUBLIC_KEY_PREFIX}-${counterName}`;
+    const res = await fetch(`${PUBLIC_COUNTER_BASE}/hit/${encodeURIComponent(key)}`);
+    if (!res.ok) throw new Error('Public counter error');
+    return parseCounterValue(await res.json()) ?? 0;
+  }
+
+  async function remoteDown(counterName) {
+    const v2Workspace = window.COUNTERAPI_V2_WORKSPACE || '';
+    if (v2Workspace) {
+      const res = await fetch(`https://api.counterapi.dev/v2/${encodeURIComponent(v2Workspace)}/${counterName}/down`);
+      if (!res.ok) throw new Error('CounterAPI v2 error');
+      return parseCounterValue(await res.json()) ?? 0;
     }
+
+    const key = `${PUBLIC_KEY_PREFIX}-${counterName}`;
+    const current = await remoteGet(counterName);
+    const next = Math.max(0, current - 1);
+    const res = await fetch(`${PUBLIC_COUNTER_BASE}/set/${encodeURIComponent(key)}?value=${next}`);
+    if (!res.ok) throw new Error('Public counter error');
+    return parseCounterValue(await res.json()) ?? next;
+  }
+
+  async function ensureVisitCounted() {
+    if (visitPromise) return visitPromise;
+
+    visitPromise = (async () => {
+      const alreadyCounted = sessionStorage.getItem(VISIT_SESSION_KEY) === '1';
+      try {
+        let count = null;
+        if (!alreadyCounted) {
+          const localData = await tryLocalJson('/api/counters/visits/up', 'POST');
+          if (localData) {
+            count = parseCounterValue(localData);
+          } else {
+            count = await remoteUp('visits');
+          }
+          if (count !== null) {
+            sessionStorage.setItem(VISIT_SESSION_KEY, '1');
+            sessionStorage.setItem(VISIT_CACHE_KEY, String(count));
+            return count;
+          }
+        } else {
+          const localData = await tryLocalJson('/api/counters/visits', 'GET');
+          if (localData) {
+            count = parseCounterValue(localData);
+          } else {
+            count = await remoteGet('visits');
+          }
+          if (count !== null) {
+            sessionStorage.setItem(VISIT_CACHE_KEY, String(count));
+            return count;
+          }
+        }
+      } catch {
+        const cached = sessionStorage.getItem(VISIT_CACHE_KEY);
+        if (cached !== null) return Number(cached);
+      }
+      return null;
+    })();
+
+    return visitPromise;
+  }
+
+  async function getSummary(projectIds = []) {
+    const localSummary = await tryLocalJson('/api/counters/summary', 'GET');
+    if (localSummary) return localSummary;
+
+    let visits = 0;
+    let totalLikes = 0;
+    const likes = {};
+
+    try {
+      visits = await remoteGet('visits');
+    } catch {
+      visits = 0;
+    }
+
+    await Promise.all(
+      projectIds.map(async (id) => {
+        try {
+          const c = await remoteGet(`likes-${id}`);
+          likes[id] = c;
+          totalLikes += c;
+        } catch {
+          likes[id] = 0;
+        }
+      })
+    );
+
+    return { visits, totalLikes, likes };
+  }
+
+  async function getProjectLikes(id) {
+    const localData = await tryLocalJson(`/api/counters/likes/${encodeURIComponent(id)}`, 'GET');
+    if (localData) {
+      return parseCounterValue(localData) ?? 0;
+    }
+    try {
+      return await remoteGet(`likes-${id}`);
+    } catch {
+      return null;
+    }
+  }
+
+  async function setProjectLike(id, shouldLike) {
+    const action = shouldLike ? 'up' : 'down';
+    const localData = await tryLocalJson(`/api/counters/likes/${encodeURIComponent(id)}/${action}`, 'POST');
+    if (localData) {
+      const count = parseCounterValue(localData);
+      if (count !== null) return count;
+    }
+    return shouldLike ? await remoteUp(`likes-${id}`) : await remoteDown(`likes-${id}`);
+  }
+
+  window.PortfolioCounters = {
+    ensureVisitCounted,
+    getSummary,
+    getProjectLikes,
+    setProjectLike,
+    escapeHtml,
+  };
+
+  // --- LIMPIEZA BFCACHE (Botón Atrás del navegador) ---
+  window.addEventListener('pageshow', () => {
+    document.querySelectorAll('.page-transition-overlay').forEach((el) => el.remove());
   });
 
-  if (backToTopBtn) {
-    backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  }
+  // --- INICIALIZACIÓN PRINCIPAL (ÚNICO DOMContentLoaded) ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const html = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const dynamicFavicon = document.getElementById('dynamic-favicon');
+    const logoDinamico = document.getElementById('logo-dinamico');
 
-  // --- 7. FECHA DE DESPLIEGUE (Footer) ---
-  const sysLastDeploy = document.getElementById('sys-last-deploy');
-  if (sysLastDeploy) {
-    const now = new Date();
-    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-    sysLastDeploy.textContent = `LAST DEPLOY: ${dateStr}`;
-  }
+    // --- 1. DETECTAR Y APLICAR TEMA ---
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    const initialTheme = savedTheme || (systemPrefersLight ? 'light' : 'dark');
 
-  // --- 8. CONTADOR DE VISITAS FLOTANTE ---
-  const visitWidget = document.createElement('div');
-  visitWidget.id = 'floating-visits';
-  visitWidget.innerHTML = `👁️ <span id="visit-counter">...</span> visitas`;
-  document.body.appendChild(visitWidget);
+    function updateAssets(theme) {
+      if (dynamicFavicon) {
+        const newIcon = theme === 'dark' ? '/assets/img/favicon_oscuro.png' : '/assets/img/favicon_claro.png';
+        if (!dynamicFavicon.href.includes(newIcon)) {
+          dynamicFavicon.href = `${newIcon}?v=${Date.now()}`;
+        }
+      }
+      if (logoDinamico) {
+        logoDinamico.src = theme === 'dark' ? '/assets/img/logo_oscuro.png' : '/assets/img/logo_claro.png';
+      }
+    }
 
-  fetch('https://api.counterapi.dev/v1/nizatf-portfolio/visits/up')
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('visit-counter').textContent = data.count;
-    })
-    .catch(() => {
-      document.getElementById('visit-counter').textContent = "---";
+    function updateIcon(theme) {
+      if (themeToggle) {
+        const iconSrc = theme === 'dark' ? '/assets/img/boton_oscuro.png' : '/assets/img/boton_claro.png';
+        let iconImg = document.getElementById('theme-icon-img');
+        if (!iconImg) {
+          themeToggle.innerHTML = `<img id="theme-icon-img" src="${iconSrc}" alt="Cambiar tema" class="theme-icon-img">`;
+        } else {
+          iconImg.src = iconSrc;
+        }
+      }
+      updateAssets(theme);
+    }
+
+    html.setAttribute('data-theme', initialTheme);
+    updateIcon(initialTheme);
+
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+    }
+
+    // --- 2. BARRA DE PROGRESO Y BOTÓN VOLVER ARRIBA ---
+    const progressBar = document.getElementById('scroll-progress');
+    const backToTopBtn = document.getElementById('back-to-top');
+
+    function updateScrollUI() {
+      if (progressBar) {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const pct = height > 0 ? (winScroll / height) * 100 : 0;
+        progressBar.style.width = `${pct}%`;
+      }
+      if (backToTopBtn) {
+        backToTopBtn.classList.toggle('is-visible', window.scrollY > 400);
+      }
+    }
+
+    window.addEventListener('scroll', updateScrollUI, { passive: true });
+    updateScrollUI();
+
+    if (backToTopBtn) {
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // --- 3. TRANSICIÓN SUAVE ENTRE PÁGINAS ---
+    const navLinks = document.querySelectorAll('.nav-links a, a.card, a.btn');
+    navLinks.forEach((link) => {
+      link.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        const href = this.getAttribute('href');
+        if (
+          this.classList.contains('active') ||
+          !href ||
+          href.startsWith('http') ||
+          href.startsWith('mailto:') ||
+          href.startsWith('#') ||
+          this.target === '_blank' ||
+          this.hasAttribute('download')
+        ) {
+          return;
+        }
+
+        e.preventDefault();
+        const overlay = document.createElement('div');
+        overlay.className = 'page-transition-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.backgroundColor = 'var(--bg)';
+        overlay.style.zIndex = '99999';
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.25s ease';
+        overlay.style.pointerEvents = 'none';
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(() => {
+          overlay.style.opacity = '1';
+        });
+
+        setTimeout(() => {
+          window.location.href = href;
+        }, 250);
+      });
     });
-});
+
+    // --- 4. FECHA DE DESPLIEGUE (Footer) ---
+    const sysLastDeploy = document.getElementById('sys-last-deploy');
+    if (sysLastDeploy) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      sysLastDeploy.textContent = `LAST DEPLOY: ${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // --- 5. WIDGET FLOTANTE DE VISITAS ---
+    if (!window.location.pathname.includes('admin.html')) {
+      const visitWidget = document.createElement('div');
+      visitWidget.id = 'floating-visits';
+      visitWidget.setAttribute('aria-live', 'polite');
+      visitWidget.innerHTML = `<span aria-hidden="true">👁️</span> <span id="visit-counter">...</span> visitas`;
+      document.body.appendChild(visitWidget);
+
+      ensureVisitCounted().then((count) => {
+        const counterEl = document.getElementById('visit-counter');
+        if (counterEl) {
+          counterEl.textContent = count !== null ? String(count) : '---';
+        }
+      });
+    }
+  });
 })();
