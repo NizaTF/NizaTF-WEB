@@ -47,5 +47,30 @@
       "Seguridad",
       "Documentación"
     ]
+  },
+  {
+    "id": "1795001003661",
+    "title": "Roll For Ambiece (RFA)",
+    "desc": "Reproductor de música y soundboard táctil para partidas de D&D. Incluye fundido cruzado, buscador y gestión de carpetas por escenarios.\n\n",
+    "link": "https://nizatf.github.io/Roll-For-Ambience/",
+    "blog": "## 🎲 El Problema\nComo jugador de D&D, siempre he tenido el problema de que las herramientas para poner música de ambiente o efectos de sonido son demasiado complejas, pesadas o requieren suscripciones de pago. Además, manejar 10 pestañas de YouTube o Spotify durante una partida es caótico y arruina la inmersión.\n\n## 💡 La Solución\n**Roll For Ambience (RFA)** es una aplicación web que centraliza todo el audio de tu campaña en una sola interfaz. Está diseñada específicamente para ser usada en móviles o tablets durante la partida, con botones grandes y un sistema de carpetas intuitivo.\n\n## ⚙️ Características Principales\n* **Fundido Cruzado (Crossfade)**: Cambia entre música de combate y música de taberna de forma suave, sin cortes bruscos de audio.\n* **Carpetas de Campaña**: Organización por escenarios (Taberna, Mazmorra, Combate, Viaje, etc.).\n* **Buscador Integrado**: Encuentra cualquier pista en milisegundos.\n* **Soundboard Táctil**: Botones optimizados para pantallas táctiles para lanzar efectos de sonido (espadas, truenos, pasos) de forma instantánea.\n* **100% Gratuito**: Código abierto, sin anuncios y sin bases de datos externas. Todo el audio se carga de forma local.\n\n## 🛠️ Stack Técnico\nPara este proyecto decidí salir de mi zona de confort (HTML puro) y utilizar herramientas modernas del ecosistema frontend:\n* **React + TypeScript**: Para manejar el estado complejo de los reproductores de audio y asegurar que el código sea robusto y escalable.\n* **Vite**: Como empaquetador, por su velocidad de desarrollo y su facilidad para generar la build final.\n* **GitHub Actions**: Configuré un flujo de trabajo (CI/CD) para que cada vez que hago un `push`, GitHub compile el proyecto automáticamente y lo despliegue en GitHub Pages.\n\n## 🧠 Lo que he aprendido\nEste proyecto me ha supuesto un gran salto a nivel técnico:\n1. **Manejo de la API de Audio HTML5**: Entender cómo funcionan los buffers, el volumen y cómo hacer el fundido cruzado entre dos pistas simultáneas fue todo un reto.\n2. **React y TypeScript**: Aprender a tipar los datos (por ejemplo, el objeto de una canción o de una carpeta) me ha ayudado a evitar errores y a estructurar mejor mis proyectos futuros.\n3. **Despliegue automatizado**: Ya no tengo que subir archivos a mano; el flujo de trabajo con GitHub Actions me ahorra muchísimo tiempo.\n\n## 🔗 Pruébalo\nLa aplicación está lista para usarse. Puedes acceder desde el botón de abajo o explorar el código fuente en el repositorio de GitHub.",
+    "images": [
+      "assets/img/projects/1795000995374_Capturadepantalla2026-11-18122145.png",
+      "assets/img/projects/1795000997519_Capturadepantalla2026-11-18122029.png",
+      "assets/img/projects/1795000999348_Capturadepantalla2026-11-18122111.png",
+      "assets/img/projects/1795001001173_Capturadepantalla2026-11-18122206.png"
+    ],
+    "imageFit": "cover",
+    "status": "active",
+    "level": 2,
+    "skills": [
+      "React",
+      "TypeScript",
+      "Vite",
+      "JavaScript",
+      "CSS3",
+      "Git",
+      "GitHub Actions"
+    ]
   }
 ]
