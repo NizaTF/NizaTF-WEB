@@ -9,7 +9,8 @@
 
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('theme');
+            let savedTheme = null;
+            try { savedTheme = localStorage.getItem('theme'); } catch {}
             const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
             if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
                 document.documentElement.setAttribute('data-theme', 'light');
@@ -243,6 +244,16 @@
     <button id="back-to-top" aria-label="Volver arriba">↑</button>
 
     <script src="ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatarFlip = document.querySelector('.avatar-flip');
+            if (avatarFlip) {
+                avatarFlip.addEventListener('click', () => {
+                    avatarFlip.classList.toggle('is-flipped');
+                });
+            }
+        });
+    </script>
 
 </body>
 

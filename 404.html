@@ -9,7 +9,8 @@
 
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('theme');
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
         document.documentElement.setAttribute('data-theme', 'light');
@@ -61,6 +62,42 @@
     main {
       flex: 1;
     }
+
+    .error-header {
+      padding-top: 100px;
+      padding-bottom: 64px;
+    }
+
+    .error-terminal-card {
+      max-width: 520px;
+      margin: 0 auto;
+      text-align: left;
+      padding: 24px;
+      background: var(--surface);
+    }
+
+    #terminal-output {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-soft);
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    @media (max-width: 640px) {
+      .error-header {
+        padding-top: 44px;
+        padding-bottom: 36px;
+      }
+      .error-terminal-card {
+        padding: 18px;
+      }
+      #terminal-output {
+        font-size: 12px;
+        line-height: 1.7;
+      }
+    }
   </style>
 </head>
 
@@ -79,16 +116,16 @@
   </nav>
 
   <main>
-    <section class="page-header" style="padding-top: 120px; padding-bottom: 80px;">
+    <section class="page-header error-header">
       <span class="eyebrow" id="error-eyebrow">Error 404</span>
       <h1 class="page-title" id="error-title">Cargando...</h1>
-      <p class="page-subtitle" id="error-desc" style="margin-bottom: 40px;"></p>
+      <p class="page-subtitle" id="error-desc" style="margin-bottom: 32px;"></p>
 
-      <div class="card" style="max-width: 520px; margin: 0 auto; text-align: left; padding: 24px; background: var(--surface);">
-        <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-soft); line-height: 1.8;" id="terminal-output"></div>
+      <div class="card error-terminal-card">
+        <div id="terminal-output"></div>
       </div>
 
-      <div style="margin-top: 40px;">
+      <div style="margin-top: 32px;">
         <a href="/index.html" class="btn btn-primary">Volver al inicio</a>
       </div>
     </section>

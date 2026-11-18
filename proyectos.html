@@ -51,6 +51,19 @@
     .carousel-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: all 0.3s ease; cursor: pointer; }
     .carousel-dots span.active { background: #fff; transform: scale(1.3); }
     .carousel-dots span:hover { background: rgba(255,255,255,0.7); }
+
+    @media (hover: none), (max-width: 850px) {
+      .carousel-nav { opacity: 1; }
+      .carousel-nav button { background: rgba(10, 14, 23, 0.55); }
+    }
+
+    @media (max-width: 640px) {
+      .filter-section { padding: 0 var(--pad-x) 24px; }
+      .filter-bar { padding: 14px; gap: 12px; }
+      .filter-search input { font-size: 16px; padding: 12px 14px 12px 40px; }
+      .filter-search .search-icon { left: 13px; font-size: 16px; }
+      .carousel-dots span { width: 10px; height: 10px; }
+    }
   </style>
 </head>
 
@@ -393,8 +406,33 @@
       updateCarouselUI(carousel, targetIndex);
     }
 
+    function attachSwipeSupport() {
+      document.querySelectorAll('.project-carousel').forEach(carousel => {
+        const images = carousel.querySelectorAll('img');
+        if (images.length <= 1 || carousel.dataset.swipeBound === '1') return;
+        carousel.dataset.swipeBound = '1';
+        let startX = 0;
+        let startY = 0;
+        carousel.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+        }, { passive: true });
+        carousel.addEventListener('touchend', (e) => {
+          const dx = e.changedTouches[0].clientX - startX;
+          const dy = e.changedTouches[0].clientY - startY;
+          if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+            const dir = dx < 0 ? 1 : -1;
+            let current = parseInt(carousel.dataset.current || '0', 10);
+            current = (current + dir + images.length) % images.length;
+            updateCarouselUI(carousel, current);
+          }
+        }, { passive: true });
+      });
+    }
+
     let carouselInterval = null;
     function startCarousels() {
+      attachSwipeSupport();
       if (carouselInterval) clearInterval(carouselInterval);
       carouselInterval = setInterval(() => {
         document.querySelectorAll('.project-carousel').forEach(carousel => {

@@ -10,7 +10,8 @@
   <script>
     // Evitar el parpadeo (FOUC) al cargar la página
     (function() {
-      const savedTheme = localStorage.getItem('theme');
+      let savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
       const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
       if (savedTheme === 'light' || (!savedTheme && systemPrefersLight)) {
         document.documentElement.setAttribute('data-theme', 'light');

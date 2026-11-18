@@ -21,34 +21,36 @@
   </script>
   <link rel="icon" type="image/png" href="assets/img/favicon_oscuro.png" id="dynamic-favicon">
   <style>
-    body { margin: 0; padding: 0; overflow: hidden; height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-sans); animation: none !important; transform: none !important; }
+    body { margin: 0; padding: 0; overflow: hidden; height: 100vh; height: 100dvh; background: var(--bg); color: var(--text); font-family: var(--font-sans); animation: none !important; transform: none !important; }
     #theme-toggle.theme-toggle { position: fixed !important; top: 15px !important; right: 20px !important; bottom: auto !important; transform: none !important; z-index: 10001 !important; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-md); padding: 0; margin: 0; }
     .theme-icon-img { width: 24px; height: 24px; object-fit: contain; }
 
-    #admin-app { display: none; height: 100vh; width: 100vw; }
+    #admin-app { display: none; height: 100vh; height: 100dvh; width: 100%; }
     #pin-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
 
-    .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
-    .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; }
-    .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; height: 100dvh; }
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-width: 0; }
+    .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     .sidebar-header h2 { font-size: 16px; margin: 0; color: var(--text); }
     .project-list-scroll { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-    .project-item { padding: 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .project-item { padding: 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     .project-item:hover { border-color: var(--accent); background: var(--bg); }
     .project-item.active { border-color: var(--accent); background: var(--accent-soft); }
-    .project-item h3 { margin: 0; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
-    .project-item .del-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 16px; padding: 0; }
+    .project-item h3 { margin: 0; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+    .project-item .del-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 18px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; border-radius: var(--r-sm); }
+    .project-item .del-btn:hover { background: var(--accent-soft); }
 
-    .main-editor { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    .editor-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding-right: 80px; }
-    .editor-header h1 { font-size: 18px; margin: 0; }
+    .main-editor { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; min-width: 0; }
+    .editor-header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--surface); padding-right: 80px; flex-shrink: 0; }
+    .editor-header h1 { font-size: 18px; margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .mobile-admin-tabs { display: none; }
 
-    .editor-body { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; }
-    .form-scroll { padding: 25px; overflow-y: auto; border-right: 1px solid var(--border); }
-    .preview-area { padding: 25px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; }
+    .editor-body { display: grid; grid-template-columns: 1fr 400px; flex: 1; overflow: hidden; min-height: 0; }
+    .form-scroll { padding: 25px; overflow-y: auto; border-right: 1px solid var(--border); min-width: 0; }
+    .preview-area { padding: 25px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; min-width: 0; }
 
-    .form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+    .form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; min-width: 0; }
     .form-field label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
     .form-field input, .form-field textarea, .form-field select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px; font-family: var(--font-sans); font-size: 14px; color: var(--text); box-sizing: border-box; outline: none; }
     .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
@@ -57,14 +59,14 @@
     .image-manager-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 200px; overflow-y: auto; }
     .image-item { display: flex; align-items: center; gap: 10px; background: var(--surface-2); padding: 8px; border-radius: var(--r-sm); border: 1px solid var(--border); cursor: grab; }
     .image-item.sortable-ghost { opacity: 0.4; border-style: dashed; border-color: var(--accent); }
-    .image-item img { width: 40px; height: 30px; object-fit: cover; border-radius: 4px; pointer-events: none; }
-    .image-item-info { flex: 1; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
-    .image-item .del-btn { background: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; padding: 4px 8px; }
+    .image-item img { width: 40px; height: 30px; object-fit: cover; border-radius: 4px; pointer-events: none; flex-shrink: 0; }
+    .image-item-info { flex: 1; min-width: 0; font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+    .image-item .del-btn { background: var(--accent); color: #fff; border: none; border-radius: 4px; cursor: pointer; padding: 4px 8px; flex-shrink: 0; }
 
-    .md-preview-box { display: none; background: var(--bg); border: 1px dashed var(--border-strong); border-radius: var(--r-md); padding: 15px; margin-top: 10px; font-size: 13px; color: var(--text-soft); line-height: 1.6; max-height: 200px; overflow-y: auto; }
+    .md-preview-box { display: none; background: var(--bg); border: 1px dashed var(--border-strong); border-radius: var(--r-md); padding: 15px; margin-top: 10px; font-size: 13px; color: var(--text-soft); line-height: 1.6; max-height: 200px; overflow-y: auto; overflow-wrap: anywhere; }
     .md-preview-box h1, .md-preview-box h2, .md-preview-box h3 { color: var(--text); margin-top: 10px; margin-bottom: 5px; }
     .md-preview-box strong { color: var(--accent); }
-    .preview-toggle { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 11px; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-top: 5px; }
+    .preview-toggle { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 11px; padding: 6px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; align-self: flex-start; }
     .preview-toggle:hover { color: var(--accent); border-color: var(--accent); }
 
     .project-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
@@ -72,7 +74,7 @@
     .preview-carousel img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.3s; object-fit: cover; }
     .preview-carousel img.active { opacity: 1; z-index: 2; }
     .project-body { padding: 20px; }
-    .project-badges { display: flex; gap: 10px; margin-bottom: 10px; }
+    .project-badges { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
     .badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; border: 1px solid transparent; }
     .badge.is-active { color: var(--green); background: rgba(61, 220, 151, 0.1); border-color: rgba(61, 220, 151, 0.3); }
     .badge.is-building { color: var(--accent); background: var(--accent-soft); border-color: var(--border-accent); }
@@ -84,8 +86,8 @@
     .project-title { font-size: 18px; margin: 0 0 10px 0; color: var(--text); }
     .project-desc { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
-    .overlay-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
-    .box { background: var(--surface); padding: 30px; border-radius: var(--r-lg); border: 1px solid var(--border); max-width: 400px; width: 100%; text-align: center; box-shadow: var(--shadow-md); box-sizing: border-box; }
+    .overlay-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 64px 16px 20px; box-sizing: border-box; overflow-y: auto; }
+    .box { background: var(--surface); padding: 30px; border-radius: var(--r-lg); border: 1px solid var(--border); max-width: 400px; width: 100%; text-align: center; box-shadow: var(--shadow-md); box-sizing: border-box; margin: auto 0; }
     .box h2 { color: var(--accent); margin-top: 0; }
     .box p { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
     .pin-input { width: 100%; padding: 15px; font-size: 24px; text-align: center; letter-spacing: 5px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: var(--r-md); outline: none; margin-bottom: 15px; font-family: var(--font-mono); box-sizing: border-box; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
@@ -98,11 +100,66 @@
     ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
     @media (max-width: 900px) {
-      .dashboard-layout { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
-      .editor-body { grid-template-columns: 1fr; }
-      .preview-area { display: none; }
-      .editor-header { padding-right: 80px; flex-direction: column; align-items: flex-start; gap: 10px; }
+      #theme-toggle.theme-toggle { top: 10px !important; right: 12px !important; width: 40px !important; height: 40px !important; }
+      .dashboard-layout { display: flex; flex-direction: column; height: 100%; width: 100%; }
+      .main-editor { order: 1; height: auto; flex: 1; min-height: 0; overflow: hidden; }
+      .editor-header { padding: 12px 14px; padding-right: 60px; flex-direction: column; align-items: stretch; gap: 10px; }
+      .editor-header h1 { font-size: 16px; }
+      .header-actions { gap: 6px; }
+      #admin-app .header-actions .btn,
+      #admin-app .sidebar-header .btn { width: auto !important; padding: 7px 10px !important; font-size: 12px !important; }
+      #admin-app #save-btn { margin-left: auto; }
+
+      .mobile-admin-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 8px 14px;
+        background: var(--surface-2);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .mobile-tab-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        border-radius: var(--r-md);
+        padding: 8px 6px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: 0.2s;
+      }
+      .mobile-tab-btn.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      #admin-app[data-mobile-view="projects"] .main-editor { flex: 0 0 auto; overflow: visible; }
+      #admin-app[data-mobile-view="projects"] .editor-body { display: none; }
+      #admin-app[data-mobile-view="projects"] .sidebar { display: flex; order: 2; flex: 1; height: auto; min-height: 0; width: 100%; border-right: none; }
+
+      #admin-app[data-mobile-view="editor"] .sidebar { display: none; }
+      #admin-app[data-mobile-view="editor"] .editor-body { display: block; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      #admin-app[data-mobile-view="editor"] .form-scroll { padding: 16px; border-right: none; overflow: visible; }
+      #admin-app[data-mobile-view="editor"] .preview-area { display: none; }
+
+      #admin-app[data-mobile-view="preview"] .sidebar { display: none; }
+      #admin-app[data-mobile-view="preview"] .editor-body { display: block; flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      #admin-app[data-mobile-view="preview"] .form-scroll { display: none; }
+      #admin-app[data-mobile-view="preview"] .preview-area { display: flex; padding: 16px; }
+    }
+
+    @media (max-width: 640px) {
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .form-field input, .form-field textarea, .form-field select { font-size: 16px; }
+      .box { padding: 22px 18px; }
+      .box h2 { font-size: 20px; }
+      .sidebar-header { padding: 14px 16px; }
+      .project-list-scroll { padding: 12px 14px; }
     }
   </style>
 </head>
@@ -145,13 +202,13 @@
     </div>
   </div>
 
-  <div id="admin-app">
+  <div id="admin-app" data-mobile-view="editor">
     <div class="dashboard-layout">
 
       <aside class="sidebar">
         <div class="sidebar-header">
           <h2>📦 Proyectos</h2>
-          <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="resetForm()">+ Nuevo</button>
+          <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" onclick="resetForm(); setMobileView('editor');">+ Nuevo</button>
         </div>
         <div class="project-list-scroll" id="projects-list"></div>
       </aside>
@@ -170,6 +227,12 @@
             <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="saveProject()" id="save-btn">💾 Guardar</button>
           </div>
         </header>
+
+        <div class="mobile-admin-tabs" role="tablist" aria-label="Vistas del panel móvil">
+          <button type="button" class="mobile-tab-btn" data-mobile-tab="projects" onclick="setMobileView('projects')">📦 Proyectos</button>
+          <button type="button" class="mobile-tab-btn active" data-mobile-tab="editor" onclick="setMobileView('editor')">✏️ Editor</button>
+          <button type="button" class="mobile-tab-btn" data-mobile-tab="preview" onclick="setMobileView('preview')">👁️ Preview</button>
+        </div>
 
         <div class="editor-body">
           <div class="form-scroll">
@@ -426,6 +489,15 @@
       }
     }
 
+    function setMobileView(view) {
+      const app = document.getElementById('admin-app');
+      if (!app) return;
+      app.dataset.mobileView = view;
+      document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mobileTab === view);
+      });
+    }
+
     function renderList() {
       const list = document.getElementById('projects-list');
       list.innerHTML = '';
@@ -436,12 +508,14 @@
           document.querySelectorAll('.project-item').forEach(el => el.classList.remove('active'));
           item.classList.add('active');
           editProject(index);
+          setMobileView('editor');
         };
         const titleEl = document.createElement('h3');
         titleEl.textContent = p.title;
         const delBtn = document.createElement('button');
         delBtn.className = 'del-btn';
         delBtn.textContent = '×';
+        delBtn.setAttribute('aria-label', 'Eliminar proyecto');
         delBtn.onclick = (e) => {
           e.stopPropagation();
           deleteProject(index);

@@ -378,7 +378,12 @@ nico:x:1000:1000:Nico Talens,,,:/home/nico:/bin/bash
       });
     }
 
-    // --- 3. TRANSICIÓN SUAVE ENTRE PÁGINAS ---
+    // --- 3. CENTRAR ENLACE ACTIVO EN MÓVIL + TRANSICIÓN SUAVE ENTRE PÁGINAS ---
+    const activeNavLink = document.querySelector('.nav-links a.active');
+    if (activeNavLink && window.innerWidth <= 850) {
+      activeNavLink.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'auto' });
+    }
+
     const navLinks = document.querySelectorAll('.nav-links a, a.card, a.btn');
     navLinks.forEach((link) => {
       link.addEventListener('click', function (e) {

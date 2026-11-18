@@ -39,7 +39,7 @@
   </nav>
 
   <main id="blog-container">
-    <p style="text-align: center; padding: 100px; color: var(--text-muted); font-family: var(--font-mono);">Cargando proyecto...</p>
+    <p style="text-align: center; padding: clamp(48px, 12vw, 100px) 20px; color: var(--text-muted); font-family: var(--font-mono);">Cargando proyecto...</p>
   </main>
 
   <footer class="footer">
@@ -135,8 +135,8 @@
             : '';
 
           const externalBtnHTML = p.link ? `
-            <div style="margin-top: 40px; text-align: center;">
-              <a href="${escapeHtml(p.link)}" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 16px; padding: 16px 32px;">
+            <div style="margin-top: 32px; text-align: center;">
+              <a href="${escapeHtml(p.link)}" target="_blank" rel="noopener" class="btn btn-primary" style="font-size: 15px; padding: 14px 28px;">
                 Visitar el proyecto en vivo ↗
               </a>
             </div>
@@ -214,8 +214,9 @@
             });
           }
 
-          // Carrusel en vista detalle
+          // Carrusel en vista detalle + swipe táctil en móvil
           let currentImg = 0;
+          const carouselEl = document.getElementById('blog-carousel');
           const imgs = document.querySelectorAll('#blog-carousel img');
           window.changeImg = (dir) => {
             if (imgs.length <= 1) return;
@@ -223,9 +224,24 @@
             currentImg = (currentImg + dir + imgs.length) % imgs.length;
             imgs[currentImg].classList.add('active');
           };
+          if (carouselEl && imgs.length > 1) {
+            let startX = 0;
+            let startY = 0;
+            carouselEl.addEventListener('touchstart', (e) => {
+              startX = e.touches[0].clientX;
+              startY = e.touches[0].clientY;
+            }, { passive: true });
+            carouselEl.addEventListener('touchend', (e) => {
+              const dx = e.changedTouches[0].clientX - startX;
+              const dy = e.changedTouches[0].clientY - startY;
+              if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                window.changeImg(dx < 0 ? 1 : -1);
+              }
+            }, { passive: true });
+          }
         })
         .catch(() => {
-          container.innerHTML = `<p style="color: var(--accent); text-align:center; padding:100px;">Error al cargar el proyecto.</p>`;
+          container.innerHTML = `<p style="color: var(--accent); text-align:center; padding: clamp(48px, 12vw, 100px) 20px;">Error al cargar el proyecto.</p>`;
         });
     });
   </script>
